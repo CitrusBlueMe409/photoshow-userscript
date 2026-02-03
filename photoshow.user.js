@@ -673,11 +673,22 @@
     const handleMouseOver = debounce(function(event) {
         const element = event.target;
 
+        // Check if assist key is required and if it's pressed
+        if (state.config.viewerTrigger === 'assist-key') {
+            const assistKeyPressed =
+                (state.config.assistKey === 'ctrl' && event.ctrlKey) ||
+                (state.config.assistKey === 'alt' && event.altKey) ||
+                (state.config.assistKey === 'shift' && event.shiftKey);
+
+            if (!assistKeyPressed) return;
+        }
+
         if (!shouldShowViewer(element)) return;
 
         const imageInfo = getImageFromElement(element);
         if (!imageInfo) return;
 
+        log('Image detected:', imageInfo.url);
         state.lastHoveredElement = element;
         showViewer(imageInfo, element);
     }, 100);
