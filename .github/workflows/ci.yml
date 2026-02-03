@@ -12,6 +12,8 @@ jobs:
   lint:
     name: Lint Code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -34,6 +36,8 @@ jobs:
     name: Build Userscript
     runs-on: ubuntu-latest
     needs: lint
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -74,6 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'release'
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout code
@@ -105,6 +111,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
     
     steps:
       - name: Checkout code
