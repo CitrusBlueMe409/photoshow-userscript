@@ -168,6 +168,28 @@ You need a userscript manager installed in your browser:
 3. PhotoShow will automatically display the high-definition version
 4. Move your mouse away to hide the viewer
 
+**Note:** By default, hover mode is active. You can change to assist-key mode in settings (requiring Ctrl/Alt/Shift + hover).
+
+### Testing
+
+Use the included test page to verify functionality:
+
+```bash
+# Open test page directly
+open test-photoshow.html
+
+# Or run test script
+./test-photoshow.sh
+```
+
+The test page includes:
+- Regular images (JPG/PNG)
+- Animated GIFs
+- Image links
+- Background images
+- Different aspect ratios
+- Small images (minimum size test)
+
 ### Keyboard Shortcuts
 
 While the viewer is active:

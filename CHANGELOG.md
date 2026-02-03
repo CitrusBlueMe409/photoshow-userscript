@@ -5,6 +5,33 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-02-03
+
+### Fixed
+- **Viewer Trigger Bug** - Implemented missing assist-key mode check
+  - Now properly checks if assist key (Ctrl/Alt/Shift) is pressed in assist-key mode
+  - Both hover and assist-key modes now work correctly
+  - Added debug logging for image detection
+
+### Added
+- **Comprehensive Test Page** - `test-photoshow.html`
+  - 6 test sections covering all image types
+  - Detailed testing instructions
+  - Status indicator for PhotoShow activation
+  - Test cases for JPG, PNG, GIF, links, background images
+  - Different aspect ratio tests (ultra-wide, ultra-tall, square)
+  - Minimum size threshold tests
+- **Automated Test Script** - `test-photoshow.sh`
+  - Verifies all critical functions exist
+  - Checks for proper event listener setup
+  - Validates Greasemonkey API usage
+  - Runs ESLint for code quality
+  - Provides detailed test results
+
+### Improved
+- Better debugging with console logging when images are detected
+- Documentation updated with testing instructions
+
 ## [1.1.0] - 2026-02-03
 
 ### Added
