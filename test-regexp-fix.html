@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow RegExp Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        h2 {
+            color: #6f42c1;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 PhotoShow RegExp Pattern Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: RegExp Object Restoration</h2>
+        <div id="test1-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Serialized RegExp (Source/Flags)</h2>
+        <div id="test2-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: HD URL Detection</h2>
+        <div id="test3-results"></div>
+    </div>
+
+    <script>
+        // Simulate the restoreRegExpPatterns function from photoshow.user.js
+        function restoreRegExpPatterns(patterns) {
+            if (!Array.isArray(patterns)) return [];
+            
+            return patterns.map(pattern => {
+                // If pattern.find is already a RegExp, return as-is
+                if (pattern.find instanceof RegExp) {
+                    return pattern;
+                }
+                
+                // If pattern.find is a serialized RegExp object (has source and flags)
+                if (pattern.find && typeof pattern.find === 'object' && pattern.find.source) {
+                    try {
+                        return {
+                            find: new RegExp(pattern.find.source, pattern.find.flags || ''),
+                            replace: pattern.replace
+                        };
+                    } catch (e) {
+                        console.warn('Failed to restore RegExp pattern:', pattern, e);
+                        return null;
+                    }
+                }
+                
+                // If pattern.find is a string representation
+                if (typeof pattern.find === 'string') {
+                    try {
+                        // Try to parse as RegExp literal
+                        const match = pattern.find.match(/^\/(.*)\/([gimsuy]*)$/);
+                        if (match) {
+                            return {
+                                find: new RegExp(match[1], match[2]),
+                                replace: pattern.replace
+                            };
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse RegExp pattern:', pattern, e);
+                    }
+                }
+                
+                return null;
+            }).filter(p => p !== null);
+        }
+
+        // Test 1: Native RegExp objects
+        function test1() {
+            const results = document.getElementById('test1-results');
+            try {
+                const patterns = [
+                    { find: /\/s\d+(-c)?\//, replace: '/s0/' },
+                    { find: /_\d+x\d+\./, replace: '.' }
+                ];
+                
+                const restored = restoreRegExpPatterns(patterns);
+                
+                if (restored.length === 2 && 
+                    typeof restored[0].find.test === 'function' &&
+                    restored[0].find.test('/s100-c/image.jpg')) {
+                    results.innerHTML += '<div class="result success">✅ Native RegExp objects work correctly</div>';
+                } else {
+                    results.innerHTML += '<div class="result error">❌ Native RegExp test failed</div>';
+                }
+            } catch (e) {
+                results.innerHTML += `<div class="result error">❌ Error: ${e.message}</div>`;
+            }
+        }
+
+        // Test 2: Serialized RegExp (simulating GM_getValue result)
+        function test2() {
+            const results = document.getElementById('test2-results');
+            try {
+                // Simulate what happens when RegExp is JSON serialized
+                const originalPattern = { find: /\/thumb\//, replace: '/original/' };
+                const serialized = JSON.parse(JSON.stringify({
+                    find: {
+                        source: originalPattern.find.source,
+                        flags: originalPattern.find.flags
+                    },
+                    replace: originalPattern.replace
+                }));
+                
+                const restored = restoreRegExpPatterns([serialized]);
+                
+                if (restored.length === 1 && 
+                    typeof restored[0].find.test === 'function' &&
+                    restored[0].find.test('/thumb/image.jpg')) {
+                    results.innerHTML += '<div class="result success">✅ Serialized RegExp objects restored correctly</div>';
+                    results.innerHTML += `<div class="result">Pattern source: <code>${restored[0].find.source}</code></div>`;
+                } else {
+                    results.innerHTML += '<div class="result error">❌ Serialized RegExp restoration failed</div>';
+                }
+            } catch (e) {
+                results.innerHTML += `<div class="result error">❌ Error: ${e.message}</div>`;
+            }
+        }
+
+        // Test 3: HD URL Detection with restored patterns
+        function test3() {
+            const results = document.getElementById('test3-results');
+            try {
+                const testUrls = [
+                    { url: 'https://example.com/s100-c/photo.jpg', expected: 'https://example.com/s0/photo.jpg' },
+                    { url: 'https://example.com/image_640x480.jpg', expected: 'https://example.com/image.jpg' },
+                    { url: 'https://example.com/thumb/photo.jpg', expected: 'https://example.com/original/photo.jpg' }
+                ];
+                
+                // Simulate serialized patterns
+                const serializedPatterns = [
+                    { find: { source: '\\/s\\d+(-c)?\\/', flags: '' }, replace: '/s0/' },
+                    { find: { source: '_\\d+x\\d+\\.', flags: '' }, replace: '.' },
+                    { find: { source: '\\/thumb\\/', flags: '' }, replace: '/original/' }
+                ];
+                
+                const patterns = restoreRegExpPatterns(serializedPatterns);
+                
+                testUrls.forEach(test => {
+                    let url = test.url;
+                    patterns.forEach(pattern => {
+                        if (pattern.find.test(url)) {
+                            url = url.replace(pattern.find, pattern.replace);
+                        }
+                    });
+                    
+                    if (url === test.expected) {
+                        results.innerHTML += `<div class="result success">✅ <code>${test.url}</code> → <code>${url}</code></div>`;
+                    } else {
+                        results.innerHTML += `<div class="result error">❌ <code>${test.url}</code> → Expected: <code>${test.expected}</code>, Got: <code>${url}</code></div>`;
+                    }
+                });
+            } catch (e) {
+                results.innerHTML += `<div class="result error">❌ Error: ${e.message}</div>`;
+            }
+        }
+
+        // Run tests
+        test1();
+        test2();
+        test3();
+    </script>
+</body>
+</html>

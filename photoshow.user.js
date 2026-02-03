@@ -107,11 +107,61 @@
     const SITE_CONFIG_KEY = `photoshow_site_${window.location.hostname}`;
     const GLOBAL_CONFIG_KEY = 'photoshow_global_config';
 
+    // Helper function to restore RegExp objects from stored patterns
+    function restoreRegExpPatterns(patterns) {
+        if (!Array.isArray(patterns)) return DEFAULT_CONFIG.hdImagePatterns;
+
+        return patterns.map(pattern => {
+            // If pattern.find is already a RegExp, return as-is
+            if (pattern.find instanceof RegExp) {
+                return pattern;
+            }
+
+            // If pattern.find is a serialized RegExp object (has source and flags)
+            if (pattern.find && typeof pattern.find === 'object' && pattern.find.source) {
+                try {
+                    return {
+                        find: new RegExp(pattern.find.source, pattern.find.flags || ''),
+                        replace: pattern.replace
+                    };
+                } catch (e) {
+                    console.warn('[PhotoShow] Failed to restore RegExp pattern:', pattern, e);
+                    return null;
+                }
+            }
+
+            // If pattern.find is a string representation
+            if (typeof pattern.find === 'string') {
+                try {
+                    // Try to parse as RegExp literal
+                    const match = pattern.find.match(/^\/(.*)\/([gimsuy]*)$/);
+                    if (match) {
+                        return {
+                            find: new RegExp(match[1], match[2]),
+                            replace: pattern.replace
+                        };
+                    }
+                } catch (e) {
+                    console.warn('[PhotoShow] Failed to parse RegExp pattern:', pattern, e);
+                }
+            }
+
+            return null;
+        }).filter(p => p !== null);
+    }
+
     // Get merged configuration (site-specific overrides global)
     function getConfig() {
         const globalConfig = GM_getValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
         const siteConfig = GM_getValue(SITE_CONFIG_KEY, {});
-        return { ...globalConfig, ...siteConfig };
+        const merged = { ...globalConfig, ...siteConfig };
+
+        // Restore RegExp objects in hdImagePatterns
+        if (merged.hdImagePatterns) {
+            merged.hdImagePatterns = restoreRegExpPatterns(merged.hdImagePatterns);
+        }
+
+        return merged;
     }
 
     function saveGlobalConfig(config) {
@@ -255,11 +305,17 @@
         let hdUrl = originalUrl;
 
         // Apply HD patterns
-        state.config.hdImagePatterns.forEach(pattern => {
-            if (pattern.find.test(hdUrl)) {
-                hdUrl = hdUrl.replace(pattern.find, pattern.replace);
-            }
-        });
+        if (Array.isArray(state.config.hdImagePatterns)) {
+            state.config.hdImagePatterns.forEach(pattern => {
+                try {
+                    if (pattern && pattern.find && typeof pattern.find.test === 'function' && pattern.find.test(hdUrl)) {
+                        hdUrl = hdUrl.replace(pattern.find, pattern.replace);
+                    }
+                } catch (e) {
+                    console.warn('[PhotoShow] Error applying HD pattern:', pattern, e);
+                }
+            });
+        }
 
         // Check if URL was modified
         if (hdUrl !== originalUrl) {
