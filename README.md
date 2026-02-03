@@ -194,9 +194,19 @@ While the viewer is active:
 
 ### Settings Menu
 
-Access settings through your userscript manager's menu:
+Access settings through your userscript manager's menu or use the comprehensive GUI:
 
-- **PhotoShow Settings** - Opens settings dialog
+#### Full Settings UI (NEW!)
+- **PhotoShow Settings** - Opens beautiful tabbed settings interface
+  - 🎨 **General Tab**: Basic settings, appearance, image info display
+  - 👁️ **Viewer Tab**: Viewer behavior, thumbnail settings, downloads
+  - ⌨️ **Keyboard Tab**: All keyboard shortcut controls
+  - 🔬 **Advanced Tab**: Advanced options and settings management
+  - Real-time preview and save functionality
+  - Export/Import settings with one click
+  - Reset options for global and site-specific settings
+
+#### Quick Menu Commands
 - **Export Settings** - Copy settings to clipboard as JSON
 - **Import Settings** - Paste JSON to restore settings
 - **Reset Global Settings** - Restore default global settings
