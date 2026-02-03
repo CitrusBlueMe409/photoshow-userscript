@@ -1,0 +1,141 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+  build:
+    name: Build Userscript
+    runs-on: ubuntu-latest
+    needs: lint
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Get version from userscript
+        id: version
+        run: |
+          VERSION=$(grep -m1 '@version' photoshow.user.js | sed 's/.*@version\s*//' | tr -d ' ')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Version: ${VERSION}"
+      
+      - name: Create build artifacts
+        run: |
+          mkdir -p dist
+          cp photoshow.user.js dist/photoshow.user.js
+          
+      - name: Generate metadata
+        run: |
+          echo "PhotoShow Userscript v${{ steps.version.outputs.version }}" > dist/BUILD_INFO.txt
+          echo "Built on: $(date)" >> dist/BUILD_INFO.txt
+          echo "Commit: ${{ github.sha }}" >> dist/BUILD_INFO.txt
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoshow-userscript-${{ steps.version.outputs.version }}
+          path: dist/
+          retention-days: 90
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'release'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep -m1 '@version' photoshow.user.js | sed 's/.*@version\s*//' | tr -d ' ')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: photoshow-userscript-${{ steps.version.outputs.version }}
+          path: dist/
+      
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/photoshow.user.js
+            dist/BUILD_INFO.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-check:
+    name: Update Check Endpoint
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Checkout main branch userscript
+        run: |
+          git fetch origin main
+          git checkout origin/main -- photoshow.user.js
+      
+      - name: Generate update metadata
+        run: |
+          VERSION=$(grep -m1 '@version' photoshow.user.js | sed 's/.*@version\s*//' | tr -d ' ')
+          cat > photoshow.meta.js << EOF
+          // ==UserScript==
+          // @name         PhotoShow - Image Viewer
+          // @namespace    https://github.com/${{ github.repository }}
+          // @version      ${VERSION}
+          // @description  View and download high-definition images by hovering over thumbnails
+          // @updateURL    https://${{ github.repository_owner }}.github.io/$(basename ${{ github.repository }})/photoshow.meta.js
+          // @downloadURL  https://${{ github.repository_owner }}.github.io/$(basename ${{ github.repository }})/photoshow.user.js
+          // ==/UserScript==
+          EOF
+      
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add photoshow.user.js photoshow.meta.js
+          git diff --staged --quiet || git commit -m "Update userscript to version ${VERSION}"
+          git push origin gh-pages || echo "No changes to push"
