@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.4.0
+// @version      2.0.0
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -342,9 +342,13 @@
     }
 
     function getImageFromElement(element) {
-        // Get image URL from img element (including srcset)
+        // Get image URL from img element (including srcset and lazy-loading attributes)
         if (element.tagName === 'IMG') {
-            let url = element.currentSrc || element.src || element.dataset.src || element.dataset.original;
+            let url = element.currentSrc || element.src ||
+                     element.dataset.src || element.dataset.original ||
+                     element.dataset.lazy || element.dataset.lazySrc ||
+                     element.dataset.highres || element.dataset.fullsize ||
+                     element.dataset.url || element.dataset.image;
 
             // Check for srcset attribute
             if (!url && element.srcset) {
@@ -364,6 +368,18 @@
             const img = element.querySelector('img');
             if (img) {
                 return getImageFromElement(img);
+            }
+            // Check sources if no img found
+            const source = element.querySelector('source[srcset], source[src]');
+            if (source) {
+                const url = source.srcset || source.src;
+                if (url) {
+                    return {
+                        url: url.split(',')[0].trim().split(' ')[0],
+                        caption: source.title || '',
+                        element
+                    };
+                }
             }
         }
 
@@ -531,20 +547,20 @@
             return { mode: 'auto-fit', maxWidth: viewport.width * 0.85, maxHeight: viewport.height * 0.85 };
         }
         case 'fit':
-            // Fit mode - fills viewport as much as possible (95%)
-            return { mode: 'fit', maxWidth: viewport.width * 0.95, maxHeight: viewport.height * 0.95 };
+            // Fit mode - fills almost entire viewport (98%)
+            return { mode: 'fit', maxWidth: viewport.width * 0.98, maxHeight: viewport.height * 0.98 };
 
         case 'max-fit':
-            // Max-fit mode - 75% of viewport (clearly smaller than fit)
-            return { mode: 'max-fit', maxWidth: viewport.width * 0.75, maxHeight: viewport.height * 0.75 };
+            // Max-fit mode - 90% of viewport (as requested by user)
+            return { mode: 'max-fit', maxWidth: viewport.width * 0.90, maxHeight: viewport.height * 0.90 };
 
         case 'lite':
-            // Small preview mode - 35% of viewport
-            return { mode: 'lite', maxWidth: viewport.width * 0.35, maxHeight: viewport.height * 0.35 };
+            // Medium preview mode - 40% of viewport
+            return { mode: 'lite', maxWidth: viewport.width * 0.40, maxHeight: viewport.height * 0.40 };
 
         case 'mini':
-            // Tiny preview mode - 20% of viewport
-            return { mode: 'mini', maxWidth: viewport.width * 0.20, maxHeight: viewport.height * 0.20 };
+            // Small preview mode - 25% of viewport
+            return { mode: 'mini', maxWidth: viewport.width * 0.25, maxHeight: viewport.height * 0.25 };
 
         case 'panoramic':
             // Full size mode - show at original size (may require scrolling)
@@ -645,11 +661,17 @@
             viewer.style.left = position.x + 'px';
             viewer.style.top = position.y + 'px';
 
-            // Update image info (hasAnyInfo already calculated above)
+            // Update image info
             const captionEl = viewer.querySelector('.photoshow-info-caption');
-            const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
-            const formatEl = viewer.querySelector('.photoshow-info-format');
-            // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
+            const detailsContainer = viewer.querySelector('.photoshow-info-details');
+
+            // Clear details container
+            while (detailsContainer.firstChild) {
+                detailsContainer.removeChild(detailsContainer.firstChild);
+            }
+
+            // Build details with separators
+            const detailsToShow = [];
 
             if (state.config.showImageInfo && state.config.imageInfoItems.caption && imageInfo.caption) {
                 captionEl.textContent = imageInfo.caption;
@@ -659,18 +681,31 @@
             }
 
             if (state.config.showImageInfo && state.config.imageInfoItems.dimensions) {
-                dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
-                dimensionsEl.style.display = 'inline';
-            } else {
-                dimensionsEl.style.display = 'none';
+                const dimSpan = document.createElement('span');
+                dimSpan.textContent = `${dimensions.width} × ${dimensions.height}`;
+                dimSpan.style.display = 'inline-block';
+                dimSpan.style.marginRight = '8px';
+                detailsToShow.push(dimSpan);
             }
 
             if (state.config.showImageInfo && state.config.imageInfoItems.format) {
-                formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
-                formatEl.style.display = 'inline';
-            } else {
-                formatEl.style.display = 'none';
+                const formatSpan = document.createElement('span');
+                formatSpan.textContent = getImageFormat(hdUrl).toUpperCase();
+                formatSpan.style.display = 'inline-block';
+                formatSpan.style.marginRight = '8px';
+                detailsToShow.push(formatSpan);
             }
+
+            // Add details with separators
+            detailsToShow.forEach((element, index) => {
+                if (index > 0) {
+                    const separator = document.createElement('span');
+                    separator.textContent = '| ';
+                    separator.style.marginRight = '8px';
+                    detailsContainer.appendChild(separator);
+                }
+                detailsContainer.appendChild(element);
+            });
 
             // Show info bar only if showImageInfo is enabled AND at least one item has content
             viewer.querySelector('.photoshow-viewer-info').style.display =
@@ -1087,7 +1122,7 @@
             .photoshow-viewer-info {
                 /* NOT absolute - flows after image naturally */
                 padding: 8px 12px;
-                background: rgba(0, 0, 0, 0.7);
+                background: rgba(0, 0, 0, 0.75);
                 color: white;
                 font-size: 12px;
                 line-height: 1.4;
@@ -1096,7 +1131,7 @@
             }
             
             #photoshow-viewer.photoshow-light .photoshow-viewer-info {
-                background: rgba(255, 255, 255, 0.9);
+                background: rgba(255, 255, 255, 0.85);
                 color: black;
             }
             
