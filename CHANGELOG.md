@@ -5,6 +5,15 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2026-02-03
+
+### Fixed
+- **View Mode Indicator Background Bug** - Fixed issue where semi-transparent background remained visible when indicator was disabled
+  - Previously: Only the text disappeared, background box stayed visible (ghostly artifact)
+  - Now: Both text AND background disappear completely when "Show View Mode Indicator" is disabled
+  - Solution: Hide entire `.photoshow-viewer-controls` container instead of just the text span
+  - Test page: `test-mode-indicator-bg.html`
+
 ## [1.1.3] - 2026-02-03
 
 ### Added

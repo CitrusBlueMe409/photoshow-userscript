@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.1.3
+// @version      1.1.4
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -577,13 +577,14 @@
             viewer.querySelector('.photoshow-viewer-info').style.display =
                 (state.config.showImageInfo && hasAnyInfo) ? 'block' : 'none';
 
-            // Update mode indicator
+            // Update mode indicator - hide entire container to remove background
+            const modeIndicatorContainer = viewer.querySelector('.photoshow-viewer-controls');
             const modeIndicator = viewer.querySelector('.photoshow-mode-indicator');
             if (state.config.showViewModeIndicator) {
                 modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
-                modeIndicator.style.display = 'block';
+                modeIndicatorContainer.style.display = 'block';
             } else {
-                modeIndicator.style.display = 'none';
+                modeIndicatorContainer.style.display = 'none';
             }
 
             // Show viewer with animation
