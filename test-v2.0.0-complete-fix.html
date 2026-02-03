@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow v2.0.0 完全修正テストページ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .section h2 {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-item {
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .test-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+        .test-item img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .checklist {
+            margin: 20px 0;
+        }
+        .checklist-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-left: 3px solid #6c757d;
+            border-radius: 4px;
+        }
+        .checklist-item.pass {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .key {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+        }
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .old { color: #dc3545; text-decoration: line-through; }
+        .new { color: #28a745; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 PhotoShow v2.0.0 完全修正テストページ</h1>
+        <p>すべてのユーザー要望に対応した完全書き直しバージョンのテストページです</p>
+        <p style="font-size: 0.9em; opacity: 0.9;">All user requirements have been addressed in this complete rewrite</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 事前準備 (Pre-Test Setup)</h2>
+        <div class="instructions">
+            <h3>1. PhotoShow v2.0.0 がインストールされていることを確認</h3>
+            <p>ユーザースクリプトマネージャーで PhotoShow のバージョンが <strong>2.0.0</strong> であることを確認してください。</p>
+            
+            <h3>2. 設定を確認</h3>
+            <p>設定 → General タブ:</p>
+            <ul>
+                <li>☑ Enable PhotoShow</li>
+                <li>☑ Show Image Info</li>
+                <li>必要に応じて Show Caption, Show Dimensions, Show Format を個別にON/OFF</li>
+            </ul>
+            
+            <h3>3. ブラウザのコンソールを開く (オプション)</h3>
+            <p>F12 キーを押してコンソールを開き、デバッグメッセージを確認できます</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ テスト1: 画像情報表示の修正 (Info Display Fix)</h2>
+        <p><strong>問題:</strong> 1項目だけ有効にしても表示されない、2項目で1つしか表示されない</p>
+        <p><strong>修正:</strong> どの組み合わせでも正しく表示される</p>
+        
+        <div class="instructions">
+            <h3>テスト手順:</h3>
+            <ol>
+                <li>設定で <strong>Show Dimensions のみ</strong>を有効にする</li>
+                <li>下の画像にホバー → "800 × 600" だけが表示されることを確認 ✅</li>
+                <li>設定で <strong>Show Format も</strong>追加で有効にする</li>
+                <li>再度ホバー → "800 × 600 | PNG" と両方表示されることを確認 ✅</li>
+                <li>設定で <strong>Show Caption も</strong>追加で有効にする</li>
+                <li>再度ホバー → 3つすべて表示されることを確認 ✅</li>
+            </ol>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>テスト画像 1</h4>
+                <img src="https://via.placeholder.com/800x600/667eea/ffffff?text=Test+Image+1" 
+                     alt="テスト画像1" 
+                     title="テスト画像1">
+                <p>800×600 PNG</p>
+            </div>
+            <div class="test-item">
+                <h4>テスト画像 2</h4>
+                <img src="https://via.placeholder.com/600x800/764ba2/ffffff?text=Test+Image+2" 
+                     alt="テスト画像2" 
+                     title="テスト画像2">
+                <p>600×800 PNG</p>
+            </div>
+            <div class="test-item">
+                <h4>テスト画像 3</h4>
+                <img src="https://via.placeholder.com/500x500/ff6b6b/ffffff?text=Test+Image+3" 
+                     alt="テスト画像3" 
+                     title="テスト画像3">
+                <p>500×500 PNG</p>
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>✅ 期待される結果:</h3>
+            <ul>
+                <li>1項目のみ有効: その1項目だけが表示される</li>
+                <li>2項目有効: 2項目が " | " で区切られて表示される (例: "800 × 600 | PNG")</li>
+                <li>3項目有効: すべてが区切られて表示される</li>
+                <li>情報バーの背景が半透明 (rgba(0, 0, 0, 0.75))</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ テスト2: ビューモードの修正 (View Mode Fix)</h2>
+        <p><strong>問題:</strong> すべてのビューモードが使い物にならない、90%はビューポートに対する割合</p>
+        <p><strong>修正:</strong> 正しいパーセンテージを使用 (fit=98%, max-fit=90%)</p>
+        
+        <div class="instructions">
+            <h3>テスト手順:</h3>
+            <ol>
+                <li>下の画像にホバーする</li>
+                <li><span class="key">F</span> キーを押す → 画像が98%のサイズ (ほぼ全画面) になることを確認 ✅</li>
+                <li><span class="key">9</span> キーを押す → 画像が90%のサイズ (明らかに小さい) になることを確認 ✅</li>
+                <li><span class="key">L</span> キーを押す → 画像が40%のサイズ (中プレビュー) になることを確認 ✅</li>
+                <li><span class="key">M</span> キーを押す → 画像が25%のサイズ (小プレビュー) になることを確認 ✅</li>
+                <li><span class="key">V</span> キーを押す → モードが切り替わることを確認 ✅</li>
+            </ol>
+        </div>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>モード</th>
+                    <th>キー</th>
+                    <th>旧 (v1.4.0)</th>
+                    <th>新 (v2.0.0)</th>
+                    <th>説明</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>fit</td>
+                    <td><span class="key">F</span></td>
+                    <td class="old">95%</td>
+                    <td class="new">98%</td>
+                    <td>ほぼ全画面表示</td>
+                </tr>
+                <tr>
+                    <td>max-fit</td>
+                    <td><span class="key">9</span></td>
+                    <td class="old">75%</td>
+                    <td class="new">90%</td>
+                    <td>ユーザー要望通り90%</td>
+                </tr>
+                <tr>
+                    <td>auto</td>
+                    <td>-</td>
+                    <td>85%</td>
+                    <td>85%</td>
+                    <td>自動調整 (変更なし)</td>
+                </tr>
+                <tr>
+                    <td>lite</td>
+                    <td><span class="key">L</span></td>
+                    <td class="old">35%</td>
+                    <td class="new">40%</td>
+                    <td>中プレビュー</td>
+                </tr>
+                <tr>
+                    <td>mini</td>
+                    <td><span class="key">M</span></td>
+                    <td class="old">20%</td>
+                    <td class="new">25%</td>
+                    <td>小プレビュー</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>横長画像</h4>
+                <img src="https://via.placeholder.com/1200x600/4ecdc4/ffffff?text=Wide+Image" 
+                     alt="横長画像">
+                <p>1200×600</p>
+            </div>
+            <div class="test-item">
+                <h4>縦長画像</h4>
+                <img src="https://via.placeholder.com/600x1200/f78fb3/ffffff?text=Tall+Image" 
+                     alt="縦長画像">
+                <p>600×1200</p>
+            </div>
+            <div class="test-item">
+                <h4>正方形画像</h4>
+                <img src="https://via.placeholder.com/800x800/95e1d3/ffffff?text=Square+Image" 
+                     alt="正方形画像">
+                <p>800×800</p>
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>✅ 期待される結果:</h3>
+            <ul>
+                <li>fit モード (F): ビューポートの98% (ほぼ全画面)</li>
+                <li>max-fit モード (9): ビューポートの90% (fitより明らかに小さい)</li>
+                <li>lite モード (L): ビューポートの40% (中程度)</li>
+                <li>mini モード (M): ビューポートの25% (小さい)</li>
+                <li>各モードで明確にサイズが異なる</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ テスト3: 埋め込み画像検出の強化 (Enhanced Image Detection)</h2>
+        <p><strong>問題:</strong> まだ一部の埋め込み画像は拡大表示されない</p>
+        <p><strong>修正:</strong> 8+の追加data属性パターンをサポート</p>
+        
+        <div class="instructions">
+            <h3>テスト手順:</h3>
+            <p>以下のさまざまな埋め込み方法の画像にホバーして、すべて拡大表示されることを確認:</p>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <h4>通常のimg</h4>
+                <img src="https://via.placeholder.com/400x300/ff6b6b/ffffff?text=Normal+IMG" alt="通常">
+            </div>
+            <div class="test-item">
+                <h4>data-lazy</h4>
+                <img src="https://via.placeholder.com/400x300/4ecdc4/ffffff?text=Lazy+Loading" 
+                     data-lazy="https://via.placeholder.com/800x600/4ecdc4/ffffff?text=HD+Lazy" 
+                     alt="Lazy">
+            </div>
+            <div class="test-item">
+                <h4>data-fullsize</h4>
+                <img src="https://via.placeholder.com/400x300/95e1d3/ffffff?text=Fullsize" 
+                     data-fullsize="https://via.placeholder.com/800x600/95e1d3/ffffff?text=HD+Fullsize" 
+                     alt="Fullsize">
+            </div>
+            <div class="test-item">
+                <h4>data-highres</h4>
+                <img src="https://via.placeholder.com/400x300/f78fb3/ffffff?text=Highres" 
+                     data-highres="https://via.placeholder.com/800x600/f78fb3/ffffff?text=HD+Highres" 
+                     alt="Highres">
+            </div>
+        </div>
+
+        <div class="success">
+            <h3>✅ 期待される結果:</h3>
+            <ul>
+                <li>通常のimgタグ: 拡大表示される ✅</li>
+                <li>data-lazy属性: HD画像が検出される ✅</li>
+                <li>data-fullsize属性: HD画像が検出される ✅</li>
+                <li>data-highres属性: HD画像が検出される ✅</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 総合チェックリスト (Overall Checklist)</h2>
+        <div class="checklist">
+            <h3>画像情報表示 (Image Info Display):</h3>
+            <div class="checklist-item">☐ 1項目のみ有効で正しく表示される</div>
+            <div class="checklist-item">☐ 2項目有効で両方表示される (区切り付き)</div>
+            <div class="checklist-item">☐ 3項目有効で全部表示される</div>
+            <div class="checklist-item">☐ 情報バーの背景が半透明</div>
+            <div class="checklist-item">☐ 情報が画像に重ならず下に表示される</div>
+            
+            <h3>ビューモード (View Modes):</h3>
+            <div class="checklist-item">☐ fit モード (F): 98% ほぼ全画面</div>
+            <div class="checklist-item">☐ max-fit モード (9): 90% (fitより小さい)</div>
+            <div class="checklist-item">☐ lite モード (L): 40% 中プレビュー</div>
+            <div class="checklist-item">☐ mini モード (M): 25% 小プレビュー</div>
+            <div class="checklist-item">☐ 各モードで明確にサイズが異なる</div>
+            <div class="checklist-item">☐ モードインジケーターが表示される</div>
+            
+            <h3>画像検出 (Image Detection):</h3>
+            <div class="checklist-item">☐ 通常のimgタグが動作する</div>
+            <div class="checklist-item">☐ data-lazy属性が検出される</div>
+            <div class="checklist-item">☐ data-fullsize属性が検出される</div>
+            <div class="checklist-item">☐ data-highres属性が検出される</div>
+            
+            <h3>全般 (General):</h3>
+            <div class="checklist-item">☐ ビューワーがビューポート内に収まる</div>
+            <div class="checklist-item">☐ 設定の変更が即座に反映される</div>
+            <div class="checklist-item">☐ コンソールエラーがない</div>
+            <div class="checklist-item">☐ パフォーマンスが良好</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎉 テスト完了後</h2>
+        <div class="success">
+            <h3>すべてのチェック項目が✅の場合:</h3>
+            <p><strong>おめでとうございます！</strong> PhotoShow v2.0.0 はすべての要件を満たしています。</p>
+            <p>All user requirements have been successfully implemented in v2.0.0!</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>問題がある場合:</h3>
+            <ol>
+                <li>ブラウザのコンソール (F12) でエラーメッセージを確認</li>
+                <li>PhotoShow の設定を確認 (有効になっているか)</li>
+                <li>ページをリロードして再テスト</li>
+                <li>それでも問題がある場合は、GitHub Issues で報告してください</li>
+            </ol>
+        </div>
+    </div>
+
+    <div style="text-align: center; padding: 30px; color: #666;">
+        <p>PhotoShow v2.0.0 Complete Rewrite Test Page</p>
+        <p>すべてのユーザー要望に対応した完全書き直しバージョン</p>
+    </div>
+</body>
+</html>

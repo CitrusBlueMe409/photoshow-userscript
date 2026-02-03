@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow v1.3.0 - Complete Algorithm Rewrite Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+        }
+        .issue {
+            background: #ffe6e6;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .fix {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .test-group {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        .test-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-images img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 3px solid #ddd;
+        }
+        .test-images img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-color: #3498db;
+        }
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .checklist {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        .checklist h3 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            font-size: 18px;
+            margin-right: 8px;
+            color: #6c757d;
+        }
+        .key-combo {
+            display: inline-block;
+            background: #343a40;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 0 4px;
+        }
+        .algorithm-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .algorithm-box {
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        .algorithm-box.old {
+            background: #ffe6e6;
+            border-color: #e74c3c;
+        }
+        .algorithm-box.new {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .diagram {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 PhotoShow v1.3.0 - Complete Algorithm Rewrite Test Page</h1>
+
+    <div class="warning">
+        <h3>⚠️ 重要 (Important)</h3>
+        <p><strong>このテストページは、PhotoShow v1.3.0の完全なアルゴリズム書き直しをテストします。</strong></p>
+        <p><strong>This test page verifies the complete algorithm rewrite in PhotoShow v1.3.0.</strong></p>
+        <p>すべての重大なバグが修正されました / All critical bugs have been fixed:</p>
+        <ul>
+            <li>✅ 画像情報の表示 (Image info display)</li>
+            <li>✅ すべてのビューモード (All view modes working)</li>
+            <li>✅ サイズと位置のアルゴリズム (Size and position algorithm)</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🐛 修正された問題 (Fixed Issues)</h2>
+        
+        <div class="issue">
+            <h3>Issue #1: 画像情報が表示されない (Image Info Not Displaying)</h3>
+            <p><strong>日本語:</strong> Show Image Info, Show Caption, Show Dimensions, Show Formatをenableにしてもなにも表示が変化しません</p>
+            <p><strong>English:</strong> Enabling "Show Image Info", "Show Caption", "Show Dimensions", "Show Format" doesn't change the display</p>
+            <p><strong>根本原因 (Root Cause):</strong> 情報バーが画像と重なっていた / Info bar overlapped the image</p>
+        </div>
+
+        <div class="issue">
+            <h3>Issue #2: ビューモードが機能しない (View Modes Not Working)</h3>
+            <p><strong>日本語:</strong> view modeがすべて使い物になりません</p>
+            <p><strong>English:</strong> All view modes are unusable</p>
+            <p><strong>根本原因 (Root Cause):</strong> すべてのモードが同じサイズに見えた / All modes looked the same size</p>
+        </div>
+
+        <div class="fix">
+            <h3>✅ 解決方法 (Solution)</h3>
+            <p><strong>完全なアルゴリズムの書き直し (Complete Algorithm Rewrite):</strong></p>
+            <ul>
+                <li>ビューアコンテナが画像+パディング+情報バーを含む / Viewer container now includes image + padding + info bar</li>
+                <li>情報バーは画像の外側に配置 / Info bar positioned outside image area</li>
+                <li>各ビューモードが異なるサイズを持つ / Each view mode has distinct size</li>
+                <li>適切な余白とスペース計算 / Proper margin and space calculation</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📐 アルゴリズムの比較 (Algorithm Comparison)</h2>
+        
+        <div class="diagram">
+旧アルゴリズム (Old - BROKEN):                新アルゴリズム (New - FIXED):
+
+┌─────────────────────┐                    ┌─────────────────────────────────────┐
+│ Viewer = Image Size │                    │ Viewer Container                    │
+│  ┌───────────────┐  │                    │  ┌───────────────────────────────┐  │
+│  │               │  │                    │  │ Padding (16px)                │  │
+│  │    Image      │  │                    │  │  ┌─────────────────────────┐  │  │
+│  │               │  │                    │  │  │                         │  │  │
+│  └───────────────┘  │                    │  │  │      Image              │  │  │
+│  Info bar overlaps! │                    │  │  │                         │  │  │
+│  [1920×1080 | PNG]  │ ← ❌ Over image    │  │  └─────────────────────────┘  │  │
+└─────────────────────┘                    │  │ Padding (16px)                │  │
+                                           │  └───────────────────────────────┘  │
+                                           │  ┌───────────────────────────────┐  │
+                                           │  │ Info Bar (44px)               │  │
+                                           │  │ 1920 × 1080 | PNG             │  │ ← ✅ Below image
+                                           │  └───────────────────────────────┘  │
+                                           └─────────────────────────────────────┘
+        </div>
+
+        <div class="algorithm-comparison">
+            <div class="algorithm-box old">
+                <h4>❌ 旧コード (Old Code)</h4>
+                <pre>// Viewer = Image size only
+const displayWidth = imageWidth * scale;
+const displayHeight = imageHeight * scale;
+
+viewer.style.width = displayWidth + 'px';
+viewer.style.height = displayHeight + 'px';
+
+// Info bar overlaps image!
+// No space reserved!</pre>
+            </div>
+            <div class="algorithm-box new">
+                <h4>✅ 新コード (New Code)</h4>
+                <pre>// Reserve space first
+const padding = 16;
+const infoBarHeight = needsInfoBar ? 44 : 0;
+
+// Calculate available space
+const maxImageWidth = viewMode.maxWidth - (padding * 2);
+const maxImageHeight = viewMode.maxHeight - (padding * 2) - infoBarHeight;
+
+// Scale image to fit available space
+const scale = Math.min(maxImageWidth / imageWidth, maxImageHeight / imageHeight, 1);
+const displayWidth = imageWidth * scale;
+const displayHeight = imageHeight * scale;
+
+// Container includes everything
+const containerWidth = displayWidth + (padding * 2);
+const containerHeight = displayHeight + (padding * 2) + infoBarHeight;
+
+viewer.style.width = containerWidth + 'px';
+viewer.style.height = containerHeight + 'px';</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🧪 テスト手順 (Test Instructions)</h2>
+        
+        <div class="instructions">
+            <h3>📋 準備 (Setup)</h3>
+            <ol>
+                <li>PhotoShow v1.3.0がインストールされていることを確認 / Ensure PhotoShow v1.3.0 is installed</li>
+                <li>設定を開く: ユーザースクリプトマネージャー → "PhotoShow Settings" / Open Settings via userscript manager</li>
+                <li><strong>General タブ:</strong> 
+                    <ul>
+                        <li>Enable PhotoShow ☑</li>
+                        <li>Show Image Info ☑</li>
+                        <li>Show Dimensions ☑</li>
+                        <li>Show Format ☑</li>
+                    </ul>
+                </li>
+                <li>"Save & Apply" をクリック / Click "Save & Apply"</li>
+                <li>このページをリロード / Reload this page</li>
+            </ol>
+        </div>
+
+        <div class="test-group">
+            <h3>Test 1: 画像情報の表示 (Image Info Display)</h3>
+            <div class="instructions">
+                <p><strong>手順 (Steps):</strong></p>
+                <ol>
+                    <li>下の画像にマウスをホバー / Hover over images below</li>
+                    <li>画像の<strong>下</strong>に情報バーが表示されることを確認 / Verify info bar appears <strong>below</strong> the image</li>
+                    <li>寸法とフォーマットが表示されることを確認 / Verify dimensions and format are displayed</li>
+                    <li>情報バーが画像と重ならないことを確認 / Verify info bar doesn't overlap the image</li>
+                </ol>
+                <p><strong>期待される結果 (Expected):</strong></p>
+                <ul>
+                    <li>✅ 情報バーが画像の外側（下）に表示される / Info bar appears outside (below) the image</li>
+                    <li>✅ 寸法が表示される (例: 1200 × 800) / Dimensions displayed (e.g., 1200 × 800)</li>
+                    <li>✅ フォーマットが表示される (例: JPG) / Format displayed (e.g., JPG)</li>
+                    <li>✅ 画像と情報バーの間にスペースがある / Space between image and info bar</li>
+                </ul>
+            </div>
+            <div class="test-images">
+                <img src="https://via.placeholder.com/1200x800/3498db/ffffff?text=1200x800+Image" alt="Test Image 1">
+                <img src="https://via.placeholder.com/800x1200/e74c3c/ffffff?text=800x1200+Image" alt="Test Image 2">
+                <img src="https://via.placeholder.com/1000x1000/2ecc71/ffffff?text=1000x1000+Image" alt="Test Image 3">
+            </div>
+        </div>
+
+        <div class="test-group">
+            <h3>Test 2: ビューモードの動作 (View Mode Functionality)</h3>
+            <div class="instructions">
+                <p><strong>手順 (Steps):</strong></p>
+                <ol>
+                    <li>下の画像にマウスをホバー / Hover over an image below</li>
+                    <li>キーボードショートカットを試す / Try keyboard shortcuts:</li>
+                    <ul>
+                        <li><span class="key-combo">A</span> - Auto mode</li>
+                        <li><span class="key-combo">F</span> - Fit mode (ビューポート全体 / fills viewport)</li>
+                        <li><span class="key-combo">9</span> - Max-fit mode (90%制約 / 90% constraint)</li>
+                        <li><span class="key-combo">L</span> - Lite mode (小プレビュー / small preview)</li>
+                        <li><span class="key-combo">M</span> - Mini mode (極小プレビュー / tiny preview)</li>
+                        <li><span class="key-combo">P</span> - Panoramic mode (オリジナルサイズ / original size)</li>
+                        <li><span class="key-combo">V</span> - Toggle mode (モード切替 / toggle mode)</li>
+                    </ul>
+                    <li>各モードで画像サイズが明確に異なることを確認 / Verify each mode shows clearly different size</li>
+                    <li>右上のモード表示を確認 / Check mode indicator at top-right</li>
+                </ol>
+                <p><strong>期待される結果 (Expected):</strong></p>
+                <ul>
+                    <li>✅ Fit mode: 大きい (ビューポート全体) / Large (fills viewport)</li>
+                    <li>✅ Max-fit mode: Fitより少し小さい (90%) / Slightly smaller than Fit (90%)</li>
+                    <li>✅ Lite mode: 中サイズ (30%) / Medium size (30%)</li>
+                    <li>✅ Mini mode: 小サイズ (15%) / Small size (15%)</li>
+                    <li>✅ 各モードが明確に異なるサイズ / Each mode clearly different size</li>
+                    <li>✅ 情報バーはすべてのモードで正しく表示 / Info bar displays correctly in all modes</li>
+                </ul>
+            </div>
+            <div class="test-images">
+                <img src="https://via.placeholder.com/2000x1000/9b59b6/ffffff?text=Wide+Image+2000x1000" alt="Wide Image">
+                <img src="https://via.placeholder.com/1000x2000/f39c12/ffffff?text=Tall+Image+1000x2000" alt="Tall Image">
+                <img src="https://via.placeholder.com/1500x1500/1abc9c/ffffff?text=Square+1500x1500" alt="Square Image">
+            </div>
+        </div>
+
+        <div class="test-group">
+            <h3>Test 3: パディングとスペース (Padding and Spacing)</h3>
+            <div class="instructions">
+                <p><strong>手順 (Steps):</strong></p>
+                <ol>
+                    <li>任意の画像にホバー / Hover over any image</li>
+                    <li>画像の周りに余白があることを確認 / Verify padding around the image</li>
+                    <li>情報バーと画像の間にスペースがあることを確認 / Verify space between image and info bar</li>
+                    <li>ビューアの外枠が見えることを確認 / Verify viewer border is visible</li>
+                </ol>
+                <p><strong>期待される結果 (Expected):</strong></p>
+                <ul>
+                    <li>✅ 画像の周りに16pxのパディング / 16px padding around image</li>
+                    <li>✅ 情報バーは画像の外側 / Info bar outside image area</li>
+                    <li>✅ プロフェッショナルな見た目 / Professional appearance</li>
+                    <li>✅ ビューアがビューポート内に収まる / Viewer stays within viewport</li>
+                </ul>
+            </div>
+            <div class="test-images">
+                <img src="https://via.placeholder.com/800x600/34495e/ffffff?text=Small+Image" alt="Small Image">
+                <img src="https://via.placeholder.com/3000x2000/c0392b/ffffff?text=Large+Image" alt="Large Image">
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>✅ テストチェックリスト (Test Checklist)</h2>
+        
+        <div class="checklist">
+            <h3>画像情報表示 (Image Info Display)</h3>
+            <ul>
+                <li>情報バーが画像の下に表示される / Info bar appears below image</li>
+                <li>寸法が正しく表示される / Dimensions display correctly</li>
+                <li>フォーマットが正しく表示される / Format displays correctly</li>
+                <li>情報バーが画像と重ならない / Info bar doesn't overlap image</li>
+                <li>情報バーに適切な余白がある / Info bar has proper spacing</li>
+            </ul>
+        </div>
+
+        <div class="checklist">
+            <h3>ビューモード (View Modes)</h3>
+            <ul>
+                <li>Fit mode (F) がビューポートを埋める / Fit mode fills viewport</li>
+                <li>Max-fit mode (9) が90%サイズで表示 / Max-fit mode shows at 90%</li>
+                <li>Lite mode (L) が中サイズで表示 / Lite mode shows medium size</li>
+                <li>Mini mode (M) が小サイズで表示 / Mini mode shows small size</li>
+                <li>Panoramic mode (P) がオリジナルサイズで表示 / Panoramic shows original size</li>
+                <li>各モードが明確に異なる / Each mode clearly different</li>
+                <li>モード切替 (V) が機能する / Mode toggle works</li>
+                <li>モードインジケーターが正しく表示 / Mode indicator displays correctly</li>
+            </ul>
+        </div>
+
+        <div class="checklist">
+            <h3>レイアウトとスペース (Layout and Spacing)</h3>
+            <ul>
+                <li>画像の周りにパディングがある / Padding around image</li>
+                <li>ビューアがビューポート内に収まる / Viewer stays in viewport</li>
+                <li>ビューアが画面外に出ない / Viewer doesn't go off-screen</li>
+                <li>適切な余白とスペース / Proper margins and spacing</li>
+                <li>プロフェッショナルな見た目 / Professional appearance</li>
+            </ul>
+        </div>
+
+        <div class="checklist">
+            <h3>全体的な動作 (Overall Behavior)</h3>
+            <ul>
+                <li>すべての画像タイプで動作する / Works with all image types</li>
+                <li>異なるアスペクト比で動作する / Works with different aspect ratios</li>
+                <li>大きい画像と小さい画像で動作する / Works with large and small images</li>
+                <li>設定変更が即座に反映される / Settings changes apply immediately</li>
+                <li>パフォーマンスが良好 / Good performance</li>
+                <li>エラーがない / No errors in console</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section success">
+        <h2>🎉 v1.3.0の成果 (v1.3.0 Achievements)</h2>
+        <ul>
+            <li>✅ <strong>画像情報表示の修正:</strong> 情報バーが画像の外側に正しく表示されます</li>
+            <li>✅ <strong>ビューモードの修正:</strong> すべてのモードが異なるサイズで正しく機能します</li>
+            <li>✅ <strong>アルゴリズムの完全書き直し:</strong> サイズと位置の計算ロジックを完全に再設計しました</li>
+            <li>✅ <strong>プロフェッショナルな外観:</strong> 適切なパディングとスペースを持つ美しいレイアウト</li>
+            <li>✅ <strong>ビューポート内に収まる:</strong> ビューアが常に画面内に表示されます</li>
+        </ul>
+        <p style="font-size: 18px; margin-top: 20px;"><strong>すべての重大な問題が修正されました！🌟</strong></p>
+        <p style="font-size: 18px;"><strong>All critical issues have been fixed! 🌟</strong></p>
+    </div>
+
+    <div class="section">
+        <h2>📞 デバッグ情報 (Debug Information)</h2>
+        <div class="instructions">
+            <p><strong>問題がある場合 (If you have issues):</strong></p>
+            <ol>
+                <li>ブラウザのコンソールを開く (F12) / Open browser console (F12)</li>
+                <li>Settings → Advanced → Debug Mode ☑ を有効にする / Enable Debug Mode</li>
+                <li>ページをリロード / Reload page</li>
+                <li>画像にホバーしてログを確認 / Hover over image and check logs</li>
+                <li>以下の情報を確認 / Check for:</li>
+                <ul>
+                    <li><code>[PhotoShow] Image detected</code></li>
+                    <li><code>[PhotoShow] HD URL</code></li>
+                    <li><code>[PhotoShow] Image dimensions</code></li>
+                    <li><code>[PhotoShow] Viewer should now be visible</code></li>
+                </ul>
+            </ol>
+            <p><strong>設定をリセット (Reset Settings):</strong></p>
+            <pre>// コンソールで実行 (Run in console)
+window.resetPhotoShowSettings()</pre>
+        </div>
+    </div>
+
+    <script>
+        console.log('🧪 PhotoShow v1.3.0 Test Page Loaded');
+        console.log('✅ This page tests the complete algorithm rewrite');
+        console.log('📋 Follow the instructions above to test all features');
+    </script>
+</body>
+</html>

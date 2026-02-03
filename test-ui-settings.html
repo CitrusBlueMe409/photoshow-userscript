@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow UI Settings Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #8b5cf6;
+            padding-bottom: 10px;
+        }
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .test-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-image {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:before {
+            content: '☐ ';
+            color: #8b5cf6;
+            font-size: 18px;
+            margin-right: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        .status.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 PhotoShow UI Settings Test Page</h1>
+    
+    <div class="test-section">
+        <h2>🎯 Test Purpose</h2>
+        <p>This page tests the new UI settings added in v1.1.3:</p>
+        <ol>
+            <li><strong>Show View Mode Indicator</strong> - Control visibility of mode indicator (AUTO, FIT, etc.) in top-right</li>
+            <li><strong>Conditional Info Bar</strong> - Hide semi-transparent bottom bar when all image info items are disabled</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Test Instructions</h2>
+        <div class="instructions">
+            <p><strong>Before starting:</strong> Make sure PhotoShow userscript is installed and enabled.</p>
+        </div>
+
+        <h3>Test 1: View Mode Indicator Toggle</h3>
+        <ol>
+            <li>Open PhotoShow Settings (from userscript manager menu)</li>
+            <li>Go to <strong>General</strong> tab</li>
+            <li>Find <strong>"Show View Mode Indicator"</strong> setting</li>
+            <li>Check the box (enabled by default)</li>
+            <li>Hover over images below → Should see mode indicator in top-right (e.g., "AUTO")</li>
+            <li>Open Settings again, uncheck <strong>"Show View Mode Indicator"</strong></li>
+            <li>Save and reload page</li>
+            <li>Hover over images → Mode indicator should be HIDDEN</li>
+        </ol>
+
+        <h3>Test 2: Info Bar Conditional Display</h3>
+        <ol>
+            <li>Open PhotoShow Settings → <strong>General</strong> tab</li>
+            <li>Ensure <strong>"Show Image Info"</strong> is checked</li>
+            <li>Check all three items: Caption, Dimensions, Format</li>
+            <li>Save and hover over images → Should see semi-transparent bar at bottom with info</li>
+            <li>Open Settings again</li>
+            <li>Uncheck <strong>"Show Caption"</strong></li>
+            <li>Save and hover → Should still see bar (Dimensions + Format)</li>
+            <li>Open Settings, uncheck <strong>"Show Dimensions"</strong></li>
+            <li>Save and hover → Should still see bar (Format only)</li>
+            <li>Open Settings, uncheck <strong>"Show Format"</strong> (all items now disabled)</li>
+            <li>Save and hover → Semi-transparent bar should be HIDDEN</li>
+        </ol>
+
+        <h3>Test 3: Combined Test</h3>
+        <ol>
+            <li>Disable both View Mode Indicator AND all Image Info Items</li>
+            <li>Hover over images → No overlays at all (clean viewer)</li>
+            <li>Re-enable one or both → Overlays appear as expected</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>🖼️ Test Images</h2>
+        <div class="test-images">
+            <img src="https://via.placeholder.com/400x300/FF6B6B/FFFFFF?text=Test+Image+1" 
+                 alt="Test Image 1" 
+                 class="test-image"
+                 title="Red Test Image">
+            <img src="https://via.placeholder.com/400x300/4ECDC4/FFFFFF?text=Test+Image+2" 
+                 alt="Test Image 2" 
+                 class="test-image"
+                 title="Teal Test Image">
+            <img src="https://via.placeholder.com/400x300/45B7D1/FFFFFF?text=Test+Image+3" 
+                 alt="Test Image 3" 
+                 class="test-image"
+                 title="Blue Test Image">
+            <img src="https://via.placeholder.com/400x300/FFA07A/FFFFFF?text=Test+Image+4" 
+                 alt="Test Image 4" 
+                 class="test-image"
+                 title="Orange Test Image">
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>✅ Test Checklist</h2>
+        <ul class="checklist">
+            <li>View mode indicator visible when setting is enabled</li>
+            <li>View mode indicator hidden when setting is disabled</li>
+            <li>Info bar visible when any image info item is enabled</li>
+            <li>Info bar visible when only one image info item is enabled</li>
+            <li>Info bar hidden when all image info items are disabled</li>
+            <li>Info bar respects "Show Image Info" master toggle</li>
+            <li>Both settings work independently</li>
+            <li>Both can be disabled simultaneously for minimal UI</li>
+            <li>Settings persist after page reload</li>
+            <li>No JavaScript errors in console</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Expected Results</h2>
+        
+        <h3>Scenario 1: All enabled (default)</h3>
+        <div class="status info">
+            <strong>View Mode Indicator:</strong> Visible in top-right (e.g., "AUTO")<br>
+            <strong>Info Bar:</strong> Visible at bottom with caption, dimensions, and format
+        </div>
+
+        <h3>Scenario 2: View Mode disabled, Info enabled</h3>
+        <div class="status info">
+            <strong>View Mode Indicator:</strong> Hidden<br>
+            <strong>Info Bar:</strong> Visible at bottom
+        </div>
+
+        <h3>Scenario 3: View Mode enabled, all Info items disabled</h3>
+        <div class="status info">
+            <strong>View Mode Indicator:</strong> Visible in top-right<br>
+            <strong>Info Bar:</strong> Hidden (no semi-transparent bar)
+        </div>
+
+        <h3>Scenario 4: Both disabled</h3>
+        <div class="status success">
+            <strong>View Mode Indicator:</strong> Hidden<br>
+            <strong>Info Bar:</strong> Hidden<br>
+            <strong>Result:</strong> Clean viewer with only the image (minimal UI)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🐛 Debug Information</h2>
+        <p>Open browser console (F12) to see PhotoShow debug logs:</p>
+        <ul>
+            <li><code>[PhotoShow] Image detected</code> - When hovering over image</li>
+            <li><code>[PhotoShow] showViewer called</code> - When viewer is displayed</li>
+            <li>Check for any errors related to <code>showViewModeIndicator</code> or info bar display</li>
+        </ul>
+    </div>
+
+    <script>
+        console.log('[Test Page] PhotoShow UI Settings Test loaded');
+        console.log('[Test Page] Hover over images to test view mode indicator and info bar settings');
+        
+        // Add hover effect for visual feedback
+        document.querySelectorAll('.test-image').forEach(img => {
+            img.addEventListener('mouseenter', () => {
+                console.log('[Test Page] Mouse entered image:', img.alt);
+            });
+        });
+    </script>
+</body>
+</html>

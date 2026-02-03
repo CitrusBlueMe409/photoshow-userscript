@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow v1.2.0 - Feature Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+        }
+        .feature-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .test-item {
+            border: 2px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .test-item img {
+            max-width: 100%;
+            height: auto;
+            cursor: pointer;
+        }
+        .test-item p {
+            margin: 10px 0 0 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .instructions {
+            background: #e8f5e9;
+            padding: 15px;
+            border-left: 4px solid #4caf50;
+            margin: 15px 0;
+        }
+        .warning {
+            background: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+            margin: 15px 0;
+        }
+        .code {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        .with-bg {
+            background-image: url('https://via.placeholder.com/400x300/667eea/ffffff?text=Background+Image');
+            background-size: cover;
+            background-position: center;
+            width: 200px;
+            height: 150px;
+            border: 2px solid #667eea;
+        }
+        .checklist {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .checklist label {
+            display: block;
+            padding: 8px 0;
+            cursor: pointer;
+        }
+        .checklist input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        kbd {
+            background: #333;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 PhotoShow v1.2.0 - Feature Test Page</h1>
+    
+    <div class="instructions">
+        <h3>📋 Prerequisites</h3>
+        <ol>
+            <li>Install PhotoShow v1.2.0 userscript in Tampermonkey/Greasemonkey/Violentmonkey</li>
+            <li>Ensure PhotoShow is enabled</li>
+            <li>Open Settings (userscript manager menu → "PhotoShow Settings")</li>
+            <li>Enable Debug Mode in Advanced tab to see console logs</li>
+        </ol>
+    </div>
+
+    <!-- Feature 1: Max-Fit Mode -->
+    <div class="feature-section">
+        <h2>1️⃣ Max-Fit View Mode (90% Viewport)</h2>
+        <p><strong>Japanese:</strong> 拡大したとき画像が見切れないように縦もしくは横90%まで画像を拡大するモード</p>
+        
+        <div class="instructions">
+            <h4>How to Test:</h4>
+            <ol>
+                <li>Hover over one of the images below</li>
+                <li>Press <kbd>9</kbd> key while viewing the image</li>
+                <li>Image should scale to exactly 90% of viewport without cropping</li>
+                <li>Try with different window sizes</li>
+            </ol>
+            <p><strong>Alternative:</strong> Set default view mode to "Max-Fit (90% no crop)" in Settings</p>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <img src="https://via.placeholder.com/800x1200/FF6B6B/ffffff?text=Tall+Image+800x1200" alt="Tall Image">
+                <p>Tall Image (800x1200)</p>
+            </div>
+            <div class="test-item">
+                <img src="https://via.placeholder.com/1600x600/4ECDC4/ffffff?text=Wide+Image+1600x600" alt="Wide Image">
+                <p>Wide Image (1600x600)</p>
+            </div>
+            <div class="test-item">
+                <img src="https://via.placeholder.com/2000x2000/95E1D3/ffffff?text=Large+Square+2000x2000" alt="Large Square">
+                <p>Large Square (2000x2000)</p>
+            </div>
+        </div>
+
+        <div class="checklist">
+            <h4>✅ Test Checklist:</h4>
+            <label><input type="checkbox"> Image fills 90% of viewport (not 80% or 100%)</label>
+            <label><input type="checkbox"> No part of image is cropped</label>
+            <label><input type="checkbox"> Keyboard shortcut <kbd>9</kbd> works</label>
+            <label><input type="checkbox"> Dropdown in Settings shows "Max-Fit" option</label>
+        </div>
+    </div>
+
+    <!-- Feature 2: Enhanced Image Detection -->
+    <div class="feature-section">
+        <h2>2️⃣ Enhanced Image Detection</h2>
+        <p><strong>Japanese:</strong> あらゆる埋め込み方がされている画像に対応</p>
+        
+        <div class="instructions">
+            <h4>How to Test:</h4>
+            <ol>
+                <li>Hover over each type of image below</li>
+                <li>Verify PhotoShow detects and displays all of them</li>
+                <li>Check console (if Debug Mode enabled) for detection messages</li>
+            </ol>
+        </div>
+
+        <div class="test-grid">
+            <!-- Regular img -->
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/E74C3C/ffffff?text=Regular+IMG" alt="Regular IMG">
+                <p>Regular &lt;img&gt;</p>
+            </div>
+
+            <!-- IMG with srcset -->
+            <div class="test-item">
+                <img srcset="https://via.placeholder.com/400x300/3498DB/ffffff?text=IMG+Srcset 1x,
+                             https://via.placeholder.com/800x600/3498DB/ffffff?text=IMG+Srcset+2x 2x"
+                     src="https://via.placeholder.com/400x300/3498DB/ffffff?text=IMG+Srcset"
+                     alt="IMG with srcset">
+                <p>&lt;img srcset&gt;</p>
+            </div>
+
+            <!-- Picture element -->
+            <div class="test-item">
+                <picture>
+                    <source srcset="https://via.placeholder.com/400x300/9B59B6/ffffff?text=Picture+Element">
+                    <img src="https://via.placeholder.com/400x300/9B59B6/ffffff?text=Picture+Fallback" alt="Picture">
+                </picture>
+                <p>&lt;picture&gt; element</p>
+            </div>
+
+            <!-- Background image -->
+            <div class="test-item">
+                <div class="with-bg" title="Background Image Test"></div>
+                <p>CSS background-image</p>
+            </div>
+
+            <!-- Link to image -->
+            <div class="test-item">
+                <a href="https://via.placeholder.com/800x600/F39C12/ffffff?text=Linked+Image">
+                    <img src="https://via.placeholder.com/200x150/F39C12/ffffff?text=Click+or+Hover" alt="Link">
+                </a>
+                <p>&lt;a&gt; to image</p>
+            </div>
+
+            <!-- SVG image element -->
+            <div class="test-item">
+                <svg width="200" height="150">
+                    <image href="https://via.placeholder.com/400x300/1ABC9C/ffffff?text=SVG+Image" 
+                           width="200" height="150" alt="SVG Image"/>
+                </svg>
+                <p>SVG &lt;image&gt;</p>
+            </div>
+
+            <!-- Data attribute -->
+            <div class="test-item">
+                <img src="https://via.placeholder.com/200x150/34495E/ffffff?text=Thumb"
+                     data-fullsize="https://via.placeholder.com/800x600/34495E/ffffff?text=Data+Attribute+HD"
+                     alt="Data Attribute">
+                <p>data-fullsize attribute</p>
+            </div>
+        </div>
+
+        <div class="checklist">
+            <h4>✅ Test Checklist:</h4>
+            <label><input type="checkbox"> Regular &lt;img&gt; detected</label>
+            <label><input type="checkbox"> &lt;img srcset&gt; detected</label>
+            <label><input type="checkbox"> &lt;picture&gt; element detected</label>
+            <label><input type="checkbox"> CSS background-image detected</label>
+            <label><input type="checkbox"> &lt;a&gt; link to image detected</label>
+            <label><input type="checkbox"> SVG &lt;image&gt; detected</label>
+            <label><input type="checkbox"> data-* attributes detected</label>
+        </div>
+    </div>
+
+    <!-- Feature 3: Exception URL List -->
+    <div class="feature-section">
+        <h2>3️⃣ Exception URL List (GUI)</h2>
+        <p><strong>Japanese:</strong> 例外URLをリスト形式でGUIで設定</p>
+        
+        <div class="instructions">
+            <h4>How to Test:</h4>
+            <ol>
+                <li>Open Settings → Advanced Tab</li>
+                <li>Find "Exception URLs" textarea</li>
+                <li>Add one of these patterns:
+                    <div class="code">
+*placeholder.com/400x300/E74C3C*<br>
+https://via.placeholder.com/400x300/3498DB*
+                    </div>
+                </li>
+                <li>Save settings and reload page</li>
+                <li>Try hovering over images - matching ones should be ignored</li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <h4>⚠️ Test Images (for exception testing):</h4>
+            <p>After adding exception patterns, these images should NOT show PhotoShow viewer:</p>
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/E74C3C/ffffff?text=Should+Be+Excluded" alt="Excluded">
+                <p>Should be excluded by pattern</p>
+            </div>
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/3498DB/ffffff?text=Should+Be+Excluded+2" alt="Excluded 2">
+                <p>Should be excluded by pattern</p>
+            </div>
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/2ECC71/ffffff?text=Should+Work" alt="Not Excluded">
+                <p>Should still work (different URL)</p>
+            </div>
+        </div>
+
+        <div class="checklist">
+            <h4>✅ Test Checklist:</h4>
+            <label><input type="checkbox"> Textarea visible in Settings → Advanced</label>
+            <label><input type="checkbox"> Can enter multiple URL patterns (one per line)</label>
+            <label><input type="checkbox"> Wildcard * matches any characters</label>
+            <label><input type="checkbox"> Wildcard ? matches single character</label>
+            <label><input type="checkbox"> Excluded URLs don't trigger PhotoShow</label>
+            <label><input type="checkbox"> Non-excluded URLs still work</label>
+        </div>
+    </div>
+
+    <!-- Feature 4: Debug Mode -->
+    <div class="feature-section">
+        <h2>4️⃣ Debug Mode Toggle</h2>
+        <p><strong>Japanese:</strong> Debug modeのオンオフトグル</p>
+        
+        <div class="instructions">
+            <h4>How to Test:</h4>
+            <ol>
+                <li>Open browser console (F12 → Console tab)</li>
+                <li>With Debug Mode OFF (default):
+                    <ul>
+                        <li>Hover over images</li>
+                        <li>Console should be clean (no PhotoShow logs)</li>
+                    </ul>
+                </li>
+                <li>Open Settings → Advanced Tab</li>
+                <li>Check "Debug Mode" checkbox</li>
+                <li>Save and reload page</li>
+                <li>With Debug Mode ON:
+                    <ul>
+                        <li>Hover over images</li>
+                        <li>Console should show logs: <code>[PhotoShow] Image detected:...</code></li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="code">
+<strong>Expected Console Output (Debug Mode ON):</strong>
+[PhotoShow] Image detected: https://via.placeholder.com/...
+[PhotoShow] showViewer called with: https://...
+[PhotoShow] HD URL: https://...
+[PhotoShow] Image dimensions: {width: 400, height: 300}
+[PhotoShow] Creating viewer
+[PhotoShow] Viewer appended to body
+        </div>
+
+        <div class="test-grid">
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/16A085/ffffff?text=Debug+Test+1" alt="Debug 1">
+                <p>Test Image 1</p>
+            </div>
+            <div class="test-item">
+                <img src="https://via.placeholder.com/400x300/8E44AD/ffffff?text=Debug+Test+2" alt="Debug 2">
+                <p>Test Image 2</p>
+            </div>
+        </div>
+
+        <div class="checklist">
+            <h4>✅ Test Checklist:</h4>
+            <label><input type="checkbox"> Checkbox visible in Settings → Advanced</label>
+            <label><input type="checkbox"> Default is unchecked (Debug OFF)</label>
+            <label><input type="checkbox"> With Debug OFF: No console logs</label>
+            <label><input type="checkbox"> With Debug ON: Console shows [PhotoShow] logs</label>
+            <label><input type="checkbox"> Setting persists after page reload</label>
+        </div>
+    </div>
+
+    <!-- Overall Testing -->
+    <div class="feature-section">
+        <h2>🎯 Overall Feature Testing</h2>
+        
+        <div class="checklist">
+            <h4>✅ Complete Test Checklist:</h4>
+            <h5>Feature 1: Max-Fit Mode</h5>
+            <label><input type="checkbox"> Max-fit mode available in dropdown</label>
+            <label><input type="checkbox"> Keyboard shortcut <kbd>9</kbd> activates max-fit</label>
+            <label><input type="checkbox"> Images scale to 90% without cropping</label>
+            
+            <h5>Feature 2: Enhanced Detection</h5>
+            <label><input type="checkbox"> All 7+ image types detected</label>
+            <label><input type="checkbox"> srcset, picture, SVG work</label>
+            <label><input type="checkbox"> Background images work</label>
+            
+            <h5>Feature 3: Exception URLs</h5>
+            <label><input type="checkbox"> GUI textarea exists in Settings</label>
+            <label><input type="checkbox"> Wildcard patterns work</label>
+            <label><input type="checkbox"> Excluded URLs don't trigger viewer</label>
+            
+            <h5>Feature 4: Debug Mode</h5>
+            <label><input type="checkbox"> Toggle exists in Settings</label>
+            <label><input type="checkbox"> Console clean when OFF</label>
+            <label><input type="checkbox"> Console shows logs when ON</label>
+            
+            <h5>General</h5>
+            <label><input type="checkbox"> All settings save and persist</label>
+            <label><input type="checkbox"> No console errors</label>
+            <label><input type="checkbox"> Existing features still work</label>
+        </div>
+    </div>
+
+    <div class="instructions" style="background: #e3f2fd; border-left-color: #2196f3;">
+        <h3>📝 Feedback</h3>
+        <p>If you find any issues or have suggestions, please report them at:</p>
+        <p><strong>GitHub:</strong> <a href="https://github.com/CitrusBlueMe409/photoshow-userscript/issues">https://github.com/CitrusBlueMe409/photoshow-userscript/issues</a></p>
+    </div>
+
+    <script>
+        // Add some dynamic info
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('PhotoShow v1.2.0 Test Page Loaded');
+            console.log('Viewport size:', window.innerWidth, 'x', window.innerHeight);
+            console.log('To see debug logs, enable Debug Mode in PhotoShow Settings');
+        });
+    </script>
+</body>
+</html>

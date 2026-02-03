@@ -1,0 +1,50 @@
+{
+  "name": "photoshow-userscript",
+  "version": "2.0.0",
+  "description": "Userscript implementation of PhotoShow browser extension - View and download high-definition images by hovering over thumbnails",
+  "main": "photoshow.user.js",
+  "scripts": {
+    "lint": "eslint photoshow.user.js",
+    "lint:fix": "eslint photoshow.user.js --fix",
+    "test": "echo \"No tests yet\" && exit 0",
+    "build": "node scripts/build.js",
+    "version": "node scripts/update-version.js",
+    "prepare": "node -e \"try{require('husky').install()}catch(e){}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CitrusBlueMe409/photoshow-userscript.git"
+  },
+  "keywords": [
+    "userscript",
+    "greasemonkey",
+    "tampermonkey",
+    "violentmonkey",
+    "image",
+    "photo",
+    "viewer",
+    "enlarger",
+    "zoom",
+    "hover",
+    "hd",
+    "high-definition",
+    "download",
+    "productivity"
+  ],
+  "author": "CitrusBlueMe409",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CitrusBlueMe409/photoshow-userscript/issues"
+  },
+  "homepage": "https://github.com/CitrusBlueMe409/photoshow-userscript#readme",
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-n": "^16.1.0",
+    "eslint-plugin-promise": "^6.1.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
