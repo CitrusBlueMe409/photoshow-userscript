@@ -419,97 +419,121 @@
     }
 
     async function showViewer(imageInfo, thumbnailElement) {
-        // Check if viewer should be shown
-        if (!state.config.enabled) return;
-        if (state.config.whitelistMode && !GM_getValue(SITE_CONFIG_KEY, null)) return;
+        try {
+            log('showViewer called with:', imageInfo.url);
 
-        // Get HD image URL
-        const hdUrl = detectHDImageUrl(imageInfo.url);
-
-        // Get image dimensions
-        const dimensions = await getImageDimensions(hdUrl);
-        if (dimensions.width === 0 || dimensions.height === 0) return;
-
-        // Create viewer if it doesn't exist
-        if (!state.currentViewer) {
-            state.currentViewer = createViewer();
-            document.body.appendChild(state.currentViewer);
-        }
-
-        const viewer = state.currentViewer;
-        const viewerImg = viewer.querySelector('.photoshow-viewer-image');
-        // const viewportMask = viewer.querySelector('.photoshow-viewport-mask'); // TODO: implement scrolling mode
-
-        // Determine view mode and dimensions
-        const viewMode = determineViewMode(dimensions.width, dimensions.height);
-        const scale = Math.min(
-            viewMode.maxWidth / dimensions.width,
-            viewMode.maxHeight / dimensions.height,
-            1
-        );
-
-        const displayWidth = dimensions.width * scale;
-        const displayHeight = dimensions.height * scale;
-
-        // Set image
-        viewerImg.src = hdUrl;
-        viewerImg.style.width = displayWidth + 'px';
-        viewerImg.style.height = displayHeight + 'px';
-
-        // Set viewer dimensions
-        viewer.style.width = displayWidth + 'px';
-        viewer.style.height = displayHeight + 'px';
-
-        // Calculate position
-        const position = calculateViewerPosition(thumbnailElement, displayWidth, displayHeight);
-        viewer.style.left = position.x + 'px';
-        viewer.style.top = position.y + 'px';
-
-        // Update image info
-        if (state.config.showImageInfo) {
-            const captionEl = viewer.querySelector('.photoshow-info-caption');
-            const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
-            const formatEl = viewer.querySelector('.photoshow-info-format');
-            // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
-
-            if (state.config.imageInfoItems.caption) {
-                captionEl.textContent = imageInfo.caption || '';
-                captionEl.style.display = imageInfo.caption ? 'block' : 'none';
+            // Check if viewer should be shown
+            if (!state.config.enabled) {
+                log('Viewer disabled in config');
+                return;
+            }
+            if (state.config.whitelistMode && !GM_getValue(SITE_CONFIG_KEY, null)) {
+                log('Whitelist mode active but no site config');
+                return;
             }
 
-            if (state.config.imageInfoItems.dimensions) {
-                dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
+            // Get HD image URL
+            const hdUrl = detectHDImageUrl(imageInfo.url);
+            log('HD URL:', hdUrl);
+
+            // Get image dimensions
+            const dimensions = await getImageDimensions(hdUrl);
+            log('Image dimensions:', dimensions);
+
+            if (dimensions.width === 0 || dimensions.height === 0) {
+                log('Failed to load image dimensions');
+                return;
             }
 
-            if (state.config.imageInfoItems.format) {
-                formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
+            // Create viewer if it doesn't exist
+            if (!state.currentViewer) {
+                log('Creating viewer');
+                state.currentViewer = createViewer();
+                document.body.appendChild(state.currentViewer);
+                log('Viewer appended to body');
             }
 
-            viewer.querySelector('.photoshow-viewer-info').style.display =
+            const viewer = state.currentViewer;
+            const viewerImg = viewer.querySelector('.photoshow-viewer-image');
+            // const viewportMask = viewer.querySelector('.photoshow-viewport-mask'); // TODO: implement scrolling mode
+
+            // Determine view mode and dimensions
+            const viewMode = determineViewMode(dimensions.width, dimensions.height);
+            const scale = Math.min(
+                viewMode.maxWidth / dimensions.width,
+                viewMode.maxHeight / dimensions.height,
+                1
+            );
+
+            const displayWidth = dimensions.width * scale;
+            const displayHeight = dimensions.height * scale;
+
+            // Set image
+            viewerImg.src = hdUrl;
+            viewerImg.style.width = displayWidth + 'px';
+            viewerImg.style.height = displayHeight + 'px';
+
+            // Set viewer dimensions
+            viewer.style.width = displayWidth + 'px';
+            viewer.style.height = displayHeight + 'px';
+
+            // Calculate position
+            const position = calculateViewerPosition(thumbnailElement, displayWidth, displayHeight);
+            viewer.style.left = position.x + 'px';
+            viewer.style.top = position.y + 'px';
+
+            // Update image info
+            if (state.config.showImageInfo) {
+                const captionEl = viewer.querySelector('.photoshow-info-caption');
+                const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
+                const formatEl = viewer.querySelector('.photoshow-info-format');
+                // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
+
+                if (state.config.imageInfoItems.caption) {
+                    captionEl.textContent = imageInfo.caption || '';
+                    captionEl.style.display = imageInfo.caption ? 'block' : 'none';
+                }
+
+                if (state.config.imageInfoItems.dimensions) {
+                    dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
+                }
+
+                if (state.config.imageInfoItems.format) {
+                    formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
+                }
+
+                viewer.querySelector('.photoshow-viewer-info').style.display =
                 state.config.showImageInfo ? 'block' : 'none';
+            }
+
+            // Update mode indicator
+            const modeIndicator = viewer.querySelector('.photoshow-mode-indicator');
+            modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
+
+            // Show viewer with animation
+            log('Making viewer visible');
+            viewer.classList.add('photoshow-visible');
+            if (state.config.transitionAnimation) {
+                viewer.style.transition = `opacity ${state.config.animationDuration}ms ease-in-out`;
+            }
+
+            // Mark as viewed
+            if (state.config.markViewedImages) {
+                state.viewedImages.add(hdUrl);
+                thumbnailElement.classList.add('photoshow-viewed');
+            }
+
+            // Store current image info
+            viewer.dataset.imageUrl = hdUrl;
+            viewer.dataset.imageWidth = dimensions.width;
+            viewer.dataset.imageHeight = dimensions.height;
+            viewer.dataset.imageCaption = imageInfo.caption || 'image';
+
+            log('Viewer should now be visible');
+        } catch (error) {
+            log('Error in showViewer:', error.message);
+            console.error('PhotoShow error:', error);
         }
-
-        // Update mode indicator
-        const modeIndicator = viewer.querySelector('.photoshow-mode-indicator');
-        modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
-
-        // Show viewer with animation
-        viewer.classList.add('photoshow-visible');
-        if (state.config.transitionAnimation) {
-            viewer.style.transition = `opacity ${state.config.animationDuration}ms ease-in-out`;
-        }
-
-        // Mark as viewed
-        if (state.config.markViewedImages) {
-            state.viewedImages.add(hdUrl);
-            thumbnailElement.classList.add('photoshow-viewed');
-        }
-
-        // Store current image info
-        viewer.dataset.imageUrl = hdUrl;
-        viewer.dataset.imageWidth = dimensions.width;
-        viewer.dataset.imageHeight = dimensions.height;
-        viewer.dataset.imageCaption = imageInfo.caption || 'image';
     }
 
     function hideViewer() {
