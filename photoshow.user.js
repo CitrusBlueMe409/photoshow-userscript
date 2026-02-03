@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.2.1
+// @version      1.3.0
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -521,34 +521,41 @@
 
         const currentMode = state.currentViewMode || state.config.defaultViewMode;
 
+        // Leave space for margins (20px on each side)
+        const marginSize = 40;
+
         switch (currentMode) {
         case 'auto': {
             // Automatically decide based on image and viewport
             const aspectRatio = imageWidth / imageHeight;
             if (aspectRatio > state.config.scrollingModeThreshold || aspectRatio < 1 / state.config.scrollingModeThreshold) {
-                return { mode: 'auto-scroll', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+                return { mode: 'auto-scroll', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
             }
-            return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+            return { mode: 'auto-fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
         }
         case 'fit':
-            // Fit mode - fills viewport as much as possible (100%)
-            return { mode: 'fit', maxWidth: viewport.width, maxHeight: viewport.height };
+            // Fit mode - fills viewport as much as possible (with margins)
+            return { mode: 'fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
 
         case 'max-fit':
             // 90% fit mode - ensures image always fits within 90% of viewport without cropping
-            return { mode: 'max-fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
+            // Use actual 90% constraint, not just smaller percentage
+            return { mode: 'max-fit', maxWidth: (viewport.width - marginSize) * 0.9, maxHeight: (viewport.height - marginSize) * 0.9 };
 
         case 'lite':
-            return { mode: 'lite', maxWidth: viewport.width * 0.25, maxHeight: viewport.height * 0.25 };
+            // Small preview mode - 30% of viewport
+            return { mode: 'lite', maxWidth: viewport.width * 0.3, maxHeight: viewport.height * 0.3 };
 
         case 'mini':
-            return { mode: 'mini', maxWidth: viewport.width * 0.125, maxHeight: viewport.height * 0.125 };
+            // Tiny preview mode - 15% of viewport
+            return { mode: 'mini', maxWidth: viewport.width * 0.15, maxHeight: viewport.height * 0.15 };
 
         case 'panoramic':
+            // Full size mode - show at original size (may require scrolling)
             return { mode: 'panoramic', maxWidth: imageWidth, maxHeight: imageHeight };
 
         default:
-            return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+            return { mode: 'auto-fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
         }
     }
 
@@ -591,45 +598,77 @@
 
             const viewer = state.currentViewer;
             const viewerImg = viewer.querySelector('.photoshow-viewer-image');
+            const imageContainer = viewer.querySelector('.photoshow-viewer-image-container');
             // const viewportMask = viewer.querySelector('.photoshow-viewport-mask'); // TODO: implement scrolling mode
 
-            // Determine view mode and dimensions
+            // Pre-calculate if we need info bar to reserve space
+            let needsInfoBar = false;
+            let hasAnyInfo = false;
+
+            if (state.config.showImageInfo) {
+                if ((state.config.imageInfoItems.caption && imageInfo.caption) ||
+                    state.config.imageInfoItems.dimensions ||
+                    state.config.imageInfoItems.format) {
+                    hasAnyInfo = true;
+                    needsInfoBar = true;
+                }
+            }
+
+            // Determine view mode and get max dimensions
             const viewMode = determineViewMode(dimensions.width, dimensions.height);
+
+            // Reserve space for padding and info bar
+            const padding = 16; // Space around image inside viewer
+            const infoBarHeight = needsInfoBar ? 44 : 0; // Info bar height when visible
+
+            // Calculate maximum space available for the image itself
+            const maxImageWidth = viewMode.maxWidth - (padding * 2);
+            const maxImageHeight = viewMode.maxHeight - (padding * 2) - infoBarHeight;
+
+            // Calculate scale to fit image in available space
             const scale = Math.min(
-                viewMode.maxWidth / dimensions.width,
-                viewMode.maxHeight / dimensions.height,
-                1
+                maxImageWidth / dimensions.width,
+                maxImageHeight / dimensions.height,
+                1 // Don't scale up beyond original size
             );
 
-            const displayWidth = dimensions.width * scale;
-            const displayHeight = dimensions.height * scale;
+            // Calculate actual image display size
+            const displayWidth = Math.round(dimensions.width * scale);
+            const displayHeight = Math.round(dimensions.height * scale);
 
-            // Set image
+            // Calculate viewer container size (includes padding and info bar)
+            const containerWidth = displayWidth + (padding * 2);
+            const containerHeight = displayHeight + (padding * 2) + infoBarHeight;
+
+            // Set image size
             viewerImg.src = hdUrl;
             viewerImg.style.width = displayWidth + 'px';
             viewerImg.style.height = displayHeight + 'px';
 
-            // Set viewer dimensions
-            viewer.style.width = displayWidth + 'px';
-            viewer.style.height = displayHeight + 'px';
+            // Set image container size (includes padding)
+            imageContainer.style.width = displayWidth + 'px';
+            imageContainer.style.height = displayHeight + 'px';
+            imageContainer.style.padding = padding + 'px';
+            imageContainer.style.boxSizing = 'content-box';
 
-            // Calculate position
-            const position = calculateViewerPosition(thumbnailElement, displayWidth, displayHeight);
+            // Set viewer outer container dimensions
+            viewer.style.width = containerWidth + 'px';
+            viewer.style.height = containerHeight + 'px';
+
+            // Calculate position based on actual viewer size
+            const position = calculateViewerPosition(thumbnailElement, containerWidth, containerHeight);
             viewer.style.left = position.x + 'px';
             viewer.style.top = position.y + 'px';
 
-            // Update image info
+            // Update image info (hasAnyInfo already calculated above)
             const captionEl = viewer.querySelector('.photoshow-info-caption');
             const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
             const formatEl = viewer.querySelector('.photoshow-info-format');
             // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
 
-            let hasAnyInfo = false;
-
             if (state.config.showImageInfo && state.config.imageInfoItems.caption && imageInfo.caption) {
                 captionEl.textContent = imageInfo.caption;
                 captionEl.style.display = 'block';
-                hasAnyInfo = true;
             } else {
                 captionEl.style.display = 'none';
             }
@@ -637,7 +676,6 @@
             if (state.config.showImageInfo && state.config.imageInfoItems.dimensions) {
                 dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
                 dimensionsEl.style.display = 'inline';
-                hasAnyInfo = true;
             } else {
                 dimensionsEl.style.display = 'none';
             }
@@ -645,7 +683,6 @@
             if (state.config.showImageInfo && state.config.imageInfoItems.format) {
                 formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
                 formatEl.style.display = 'inline';
-                hasAnyInfo = true;
             } else {
                 formatEl.style.display = 'none';
             }
@@ -1038,15 +1075,16 @@
             
             .photoshow-viewer-image-container {
                 position: relative;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: content-box;
             }
             
             .photoshow-viewer-image {
                 display: block;
-                width: 100%;
-                height: 100%;
+                max-width: 100%;
+                max-height: 100%;
                 object-fit: contain;
                 transition: transform 0.3s ease-in-out;
             }

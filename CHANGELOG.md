@@ -5,6 +5,44 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-02-03
+
+### Fixed
+- **CRITICAL: Complete rewrite of viewer sizing and positioning algorithm**
+  - Fixed image info bar not displaying - info bar now appears OUTSIDE the image area with proper spacing
+  - Fixed all view modes being unusable - each mode now has distinct, working behavior
+  - Fixed viewer sizing to properly account for padding and info bar height
+  - Fixed position calculation to ensure viewer stays within viewport bounds
+  - Image container now includes proper padding (16px) around the image
+  - Info bar height (44px) is reserved when enabled, preventing overlap with image
+  - Viewer container size now correctly calculated as: image + padding + info bar
+
+### Changed
+- **View mode algorithm completely redesigned:**
+  - `auto`: Smart fit with proper margins (40px total)
+  - `fit`: Fills viewport with margins, maintains aspect ratio
+  - `max-fit`: Uses 90% constraint with proper calculation (not just percentage)
+  - `lite`: 30% of viewport (increased from 25% for better visibility)
+  - `mini`: 15% of viewport (increased from 12.5% for better visibility)
+  - `panoramic`: Shows at original size
+- **Viewer structure improved:**
+  - Image container now uses flexbox for perfect centering
+  - Padding applied to container, not image
+  - Info bar positioned outside image area at viewer bottom
+  - Mode indicator properly positioned at top-right with background
+- All view modes now leave 40px margin for viewport edges
+- Position calculation now uses actual viewer size (image + padding + info)
+
+### Technical Details
+- Redesigned `determineViewMode()` function with proper margin handling
+- Rewrote viewer sizing in `showViewer()` to calculate:
+  1. Available space for image (maxWidth/maxHeight - padding - infoBar)
+  2. Image scale to fit available space
+  3. Actual image display size
+  4. Container size (image + padding + infoBar)
+- Updated CSS for `.photoshow-viewer-image-container` to use flexbox
+- Pre-calculation of info bar needs before sizing to reserve correct space
+
 ## [1.2.1] - 2026-02-03
 
 ### Fixed
