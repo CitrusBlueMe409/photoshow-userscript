@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.1.2
+// @version      1.1.3
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -48,6 +48,7 @@
 
         // Image info display
         showImageInfo: true,
+        showViewModeIndicator: true,
         imageInfoItems: {
             caption: true,
             dimensions: true,
@@ -541,32 +542,49 @@
             viewer.style.top = position.y + 'px';
 
             // Update image info
-            if (state.config.showImageInfo) {
-                const captionEl = viewer.querySelector('.photoshow-info-caption');
-                const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
-                const formatEl = viewer.querySelector('.photoshow-info-format');
-                // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
+            const captionEl = viewer.querySelector('.photoshow-info-caption');
+            const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
+            const formatEl = viewer.querySelector('.photoshow-info-format');
+            // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
 
-                if (state.config.imageInfoItems.caption) {
-                    captionEl.textContent = imageInfo.caption || '';
-                    captionEl.style.display = imageInfo.caption ? 'block' : 'none';
-                }
+            let hasAnyInfo = false;
 
-                if (state.config.imageInfoItems.dimensions) {
-                    dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
-                }
-
-                if (state.config.imageInfoItems.format) {
-                    formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
-                }
-
-                viewer.querySelector('.photoshow-viewer-info').style.display =
-                state.config.showImageInfo ? 'block' : 'none';
+            if (state.config.showImageInfo && state.config.imageInfoItems.caption && imageInfo.caption) {
+                captionEl.textContent = imageInfo.caption;
+                captionEl.style.display = 'block';
+                hasAnyInfo = true;
+            } else {
+                captionEl.style.display = 'none';
             }
+
+            if (state.config.showImageInfo && state.config.imageInfoItems.dimensions) {
+                dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
+                dimensionsEl.style.display = 'inline';
+                hasAnyInfo = true;
+            } else {
+                dimensionsEl.style.display = 'none';
+            }
+
+            if (state.config.showImageInfo && state.config.imageInfoItems.format) {
+                formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
+                formatEl.style.display = 'inline';
+                hasAnyInfo = true;
+            } else {
+                formatEl.style.display = 'none';
+            }
+
+            // Show info bar only if showImageInfo is enabled AND at least one item has content
+            viewer.querySelector('.photoshow-viewer-info').style.display =
+                (state.config.showImageInfo && hasAnyInfo) ? 'block' : 'none';
 
             // Update mode indicator
             const modeIndicator = viewer.querySelector('.photoshow-mode-indicator');
-            modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
+            if (state.config.showViewModeIndicator) {
+                modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
+                modeIndicator.style.display = 'block';
+            } else {
+                modeIndicator.style.display = 'none';
+            }
 
             // Show viewer with animation
             log('Making viewer visible');
@@ -1340,6 +1358,15 @@
                                         <input type="checkbox" id="setting-imageInfoItems-format" ${config.imageInfoItems?.format ? 'checked' : ''}>
                                     </div>
                                 </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Show View Mode Indicator</div>
+                                        <div class="photoshow-setting-label-desc">Display mode indicator in top-right corner (AUTO, FIT, etc.)</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-showViewModeIndicator" ${config.showViewModeIndicator ? 'checked' : ''}>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -1655,6 +1682,7 @@
                 transitionAnimation: dialog.querySelector('#setting-transitionAnimation').checked,
                 animationDuration: parseInt(dialog.querySelector('#setting-animationDuration').value),
                 showImageInfo: dialog.querySelector('#setting-showImageInfo').checked,
+                showViewModeIndicator: dialog.querySelector('#setting-showViewModeIndicator').checked,
                 imageInfoItems: {
                     caption: dialog.querySelector('#setting-imageInfoItems-caption').checked,
                     dimensions: dialog.querySelector('#setting-imageInfoItems-dimensions').checked,

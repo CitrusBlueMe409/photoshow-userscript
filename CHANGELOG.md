@@ -5,6 +5,28 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-02-03
+
+### Added
+- **Show View Mode Indicator Setting** - New toggle to control visibility of mode indicator in top-right corner
+  - Added `showViewModeIndicator` setting to configuration (default: true)
+  - Added UI control in General tab of Settings dialog
+  - Mode indicator (AUTO, FIT, LITE, etc.) can now be hidden for minimal UI
+  
+### Changed
+- **Conditional Info Bar Display** - Info bar now hides when all image info items are disabled
+  - Info bar (semi-transparent bottom overlay) only displays when at least one info item is enabled
+  - Previously displayed even when all items (caption, dimensions, format) were disabled
+  - Enables truly minimal UI when combined with disabled view mode indicator
+  - Info bar checks both `showImageInfo` master toggle and individual item settings
+
+### Added
+- **UI Settings Test Page** - `test-ui-settings.html`
+  - Comprehensive test cases for new settings
+  - Step-by-step testing instructions
+  - Visual checklist for verification
+  - Expected results for all scenarios
+
 ## [1.1.2] - 2026-02-03
 
 ### Fixed
