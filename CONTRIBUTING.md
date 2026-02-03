@@ -68,6 +68,21 @@ We use ESLint with the Standard config. Key points:
 
 Run `npm run lint:fix` to auto-fix most style issues.
 
+### Modern JavaScript Standards
+
+⚠️ **Important:** We follow modern JavaScript best practices:
+
+- ✅ Use `new MouseEvent()` constructor
+- ❌ DO NOT use deprecated `initMouseEvent()`
+- ✅ Use `new KeyboardEvent()` constructor  
+- ❌ DO NOT use deprecated `initKeyboardEvent()`
+- ✅ Use modern Event constructors
+- ❌ DO NOT use `document.createEvent()` with `init*()` methods
+
+**See:** [docs/coding-standards.md](docs/coding-standards.md) for complete guidelines.
+
+Our ESLint configuration will automatically catch use of deprecated APIs.
+
 ## 🏗️ Project Structure
 
 ```

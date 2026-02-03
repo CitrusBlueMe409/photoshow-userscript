@@ -26,6 +26,26 @@ module.exports = {
     'no-console': 'off',
     indent: ['error', 4],
     semi: ['error', 'always'],
-    'space-before-function-paren': ['error', 'never']
+    'space-before-function-paren': ['error', 'never'],
+    // Prevent use of deprecated event APIs
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'CallExpression[callee.property.name="initMouseEvent"]',
+        message: 'initMouseEvent() is deprecated. Use new MouseEvent() constructor instead.'
+      },
+      {
+        selector: 'CallExpression[callee.property.name="initEvent"]',
+        message: 'initEvent() is deprecated. Use Event constructors (MouseEvent, KeyboardEvent, etc.) instead.'
+      },
+      {
+        selector: 'CallExpression[callee.property.name="initKeyboardEvent"]',
+        message: 'initKeyboardEvent() is deprecated. Use new KeyboardEvent() constructor instead.'
+      },
+      {
+        selector: 'CallExpression[callee.property.name="initCustomEvent"]',
+        message: 'initCustomEvent() is deprecated. Use new CustomEvent() constructor instead.'
+      }
+    ]
   }
 };

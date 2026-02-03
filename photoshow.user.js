@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.1.4
+// @version      1.1.5
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*

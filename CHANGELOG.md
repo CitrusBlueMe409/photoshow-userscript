@@ -5,6 +5,38 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.5] - 2026-02-03
+
+### Added
+- **Coding Standards Documentation** - Comprehensive guidelines for modern JavaScript
+  - Created `docs/coding-standards.md` (English) and `docs/coding-standards-ja.md` (Japanese)
+  - Documents proper use of modern Event constructors (MouseEvent, KeyboardEvent, etc.)
+  - Explains why `initMouseEvent()` and similar methods are deprecated
+  - Provides migration examples from old to new APIs
+  - Includes browser compatibility information
+  
+- **ESLint Rules for Deprecated APIs** - Prevent use of obsolete event initialization methods
+  - Added `no-restricted-syntax` rules to catch deprecated APIs:
+    - `initMouseEvent()` → Use `new MouseEvent()`
+    - `initEvent()` → Use Event constructors
+    - `initKeyboardEvent()` → Use `new KeyboardEvent()`
+    - `initCustomEvent()` → Use `new CustomEvent()`
+  - ESLint will now show clear error messages when deprecated methods are used
+  - Verified rules work correctly with test cases
+
+### Changed
+- **CONTRIBUTING.md** - Updated with references to new coding standards
+  - Added section on modern JavaScript standards
+  - Links to comprehensive coding standards documentation
+  - Emphasizes use of modern Event constructors
+
+### Technical Details
+- **Issue:** initMouseEvent() は推奨されません。代わりに MouseEvent() コンストラクターを使用してください。
+- **Translation:** "initMouseEvent() is deprecated. Please use the MouseEvent() constructor instead."
+- **Status:** ✅ No deprecated APIs currently in use
+- **Prevention:** ESLint rules now prevent future use
+- **Documentation:** Bilingual guides available for contributors
+
 ## [1.1.4] - 2026-02-03
 
 ### Fixed
