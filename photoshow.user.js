@@ -954,25 +954,733 @@
     }
 
     function openSettingsDialog() {
-        // Create a simple settings UI
+        // Create a comprehensive settings UI
         const dialog = document.createElement('div');
+        dialog.id = 'photoshow-settings-dialog';
+
+        const config = state.config;
+
         dialog.innerHTML = `
-            <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                        background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                        z-index: 10000000; max-width: 500px; max-height: 80vh; overflow-y: auto; color: black;">
-                <h2 style="margin-top: 0;">PhotoShow Settings</h2>
-                <p>Use GM_registerMenuCommand options for now.</p>
-                <p>Full settings UI coming soon!</p>
-                <button id="photoshow-close-settings" style="margin-top: 20px; padding: 8px 16px;">Close</button>
+            <style>
+                #photoshow-settings-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 9999999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                #photoshow-settings-container {
+                    background: #ffffff;
+                    color: #333;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                    width: 90%;
+                    max-width: 800px;
+                    max-height: 85vh;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                #photoshow-settings-header {
+                    padding: 20px 24px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 12px 12px 0 0;
+                }
+                #photoshow-settings-header h2 {
+                    margin: 0;
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+                #photoshow-settings-header p {
+                    margin: 8px 0 0 0;
+                    opacity: 0.9;
+                    font-size: 14px;
+                }
+                #photoshow-settings-tabs {
+                    display: flex;
+                    background: #f5f5f5;
+                    border-bottom: 1px solid #ddd;
+                    padding: 0 24px;
+                }
+                .photoshow-tab {
+                    padding: 12px 20px;
+                    cursor: pointer;
+                    border: none;
+                    background: none;
+                    color: #666;
+                    font-size: 14px;
+                    font-weight: 500;
+                    border-bottom: 2px solid transparent;
+                    transition: all 0.2s;
+                }
+                .photoshow-tab:hover {
+                    color: #667eea;
+                    background: rgba(102, 126, 234, 0.1);
+                }
+                .photoshow-tab.active {
+                    color: #667eea;
+                    border-bottom-color: #667eea;
+                }
+                #photoshow-settings-content {
+                    flex: 1;
+                    overflow-y: auto;
+                    padding: 24px;
+                }
+                .photoshow-tab-panel {
+                    display: none;
+                }
+                .photoshow-tab-panel.active {
+                    display: block;
+                }
+                .photoshow-setting-group {
+                    margin-bottom: 24px;
+                    padding: 16px;
+                    background: #f9f9f9;
+                    border-radius: 8px;
+                }
+                .photoshow-setting-group h3 {
+                    margin: 0 0 12px 0;
+                    font-size: 16px;
+                    color: #333;
+                    font-weight: 600;
+                }
+                .photoshow-setting-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #e0e0e0;
+                }
+                .photoshow-setting-item:last-child {
+                    border-bottom: none;
+                }
+                .photoshow-setting-label {
+                    flex: 1;
+                    margin-right: 16px;
+                }
+                .photoshow-setting-label-title {
+                    font-weight: 500;
+                    color: #333;
+                    margin-bottom: 4px;
+                }
+                .photoshow-setting-label-desc {
+                    font-size: 12px;
+                    color: #666;
+                }
+                .photoshow-setting-control {
+                    flex-shrink: 0;
+                }
+                .photoshow-setting-control input[type="checkbox"] {
+                    width: 20px;
+                    height: 20px;
+                    cursor: pointer;
+                }
+                .photoshow-setting-control select,
+                .photoshow-setting-control input[type="text"],
+                .photoshow-setting-control input[type="number"] {
+                    padding: 6px 12px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    min-width: 150px;
+                }
+                .photoshow-setting-control select:focus,
+                .photoshow-setting-control input:focus {
+                    outline: none;
+                    border-color: #667eea;
+                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+                }
+                #photoshow-settings-footer {
+                    padding: 16px 24px;
+                    background: #f5f5f5;
+                    border-top: 1px solid #ddd;
+                    display: flex;
+                    justify-content: space-between;
+                    gap: 12px;
+                }
+                .photoshow-btn {
+                    padding: 10px 20px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .photoshow-btn-primary {
+                    background: #667eea;
+                    color: white;
+                }
+                .photoshow-btn-primary:hover {
+                    background: #5568d3;
+                    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+                }
+                .photoshow-btn-secondary {
+                    background: #e0e0e0;
+                    color: #333;
+                }
+                .photoshow-btn-secondary:hover {
+                    background: #d0d0d0;
+                }
+                .photoshow-btn-danger {
+                    background: #ef4444;
+                    color: white;
+                }
+                .photoshow-btn-danger:hover {
+                    background: #dc2626;
+                }
+            </style>
+            <div id="photoshow-settings-overlay">
+                <div id="photoshow-settings-container">
+                    <div id="photoshow-settings-header">
+                        <h2>⚙️ PhotoShow Settings</h2>
+                        <p>Configure your image viewing experience</p>
+                    </div>
+                    
+                    <div id="photoshow-settings-tabs">
+                        <button class="photoshow-tab active" data-tab="general">General</button>
+                        <button class="photoshow-tab" data-tab="viewer">Viewer</button>
+                        <button class="photoshow-tab" data-tab="keyboard">Keyboard</button>
+                        <button class="photoshow-tab" data-tab="advanced">Advanced</button>
+                    </div>
+                    
+                    <div id="photoshow-settings-content">
+                        <!-- General Settings Tab -->
+                        <div class="photoshow-tab-panel active" data-panel="general">
+                            <div class="photoshow-setting-group">
+                                <h3>🔧 Basic Settings</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Enable PhotoShow</div>
+                                        <div class="photoshow-setting-label-desc">Turn on/off the image viewer</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-enabled" ${config.enabled ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Whitelist Mode</div>
+                                        <div class="photoshow-setting-label-desc">Disable globally, enable per-site</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-whitelistMode" ${config.whitelistMode ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="photoshow-setting-group">
+                                <h3>🎨 Appearance</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Color Scheme</div>
+                                        <div class="photoshow-setting-label-desc">Choose light or dark theme</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <select id="setting-colorScheme">
+                                            <option value="light" ${config.colorScheme === 'light' ? 'selected' : ''}>Light</option>
+                                            <option value="dark" ${config.colorScheme === 'dark' ? 'selected' : ''}>Dark</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Transition Animation</div>
+                                        <div class="photoshow-setting-label-desc">Enable smooth fade animations</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-transitionAnimation" ${config.transitionAnimation ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Animation Duration</div>
+                                        <div class="photoshow-setting-label-desc">Duration in milliseconds</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="number" id="setting-animationDuration" value="${config.animationDuration}" min="0" max="1000" step="50">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="photoshow-setting-group">
+                                <h3>ℹ️ Image Information</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Show Image Info</div>
+                                        <div class="photoshow-setting-label-desc">Display image details</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-showImageInfo" ${config.showImageInfo ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Show Caption</div>
+                                        <div class="photoshow-setting-label-desc">Display image alt/title text</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-imageInfoItems-caption" ${config.imageInfoItems?.caption ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Show Dimensions</div>
+                                        <div class="photoshow-setting-label-desc">Display width × height</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-imageInfoItems-dimensions" ${config.imageInfoItems?.dimensions ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Show Format</div>
+                                        <div class="photoshow-setting-label-desc">Display file format (JPG, PNG, etc.)</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-imageInfoItems-format" ${config.imageInfoItems?.format ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Viewer Settings Tab -->
+                        <div class="photoshow-tab-panel" data-panel="viewer">
+                            <div class="photoshow-setting-group">
+                                <h3>👁️ Viewer Behavior</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Viewer Trigger</div>
+                                        <div class="photoshow-setting-label-desc">How to activate the viewer</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <select id="setting-viewerTrigger">
+                                            <option value="hover" ${config.viewerTrigger === 'hover' ? 'selected' : ''}>Hover</option>
+                                            <option value="assist-key" ${config.viewerTrigger === 'assist-key' ? 'selected' : ''}>Assist Key</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Assist Key</div>
+                                        <div class="photoshow-setting-label-desc">Key to hold for assist mode</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <select id="setting-assistKey">
+                                            <option value="ctrl" ${config.assistKey === 'ctrl' ? 'selected' : ''}>Ctrl</option>
+                                            <option value="alt" ${config.assistKey === 'alt' ? 'selected' : ''}>Alt</option>
+                                            <option value="shift" ${config.assistKey === 'shift' ? 'selected' : ''}>Shift</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Default View Mode</div>
+                                        <div class="photoshow-setting-label-desc">Initial view mode on hover</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <select id="setting-defaultViewMode">
+                                            <option value="auto" ${config.defaultViewMode === 'auto' ? 'selected' : ''}>Auto</option>
+                                            <option value="fit" ${config.defaultViewMode === 'fit' ? 'selected' : ''}>Fit</option>
+                                            <option value="lite" ${config.defaultViewMode === 'lite' ? 'selected' : ''}>Lite</option>
+                                            <option value="mini" ${config.defaultViewMode === 'mini' ? 'selected' : ''}>Mini</option>
+                                            <option value="panoramic" ${config.defaultViewMode === 'panoramic' ? 'selected' : ''}>Panoramic</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="photoshow-setting-group">
+                                <h3>🖼️ Thumbnail Settings</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Minimum Width</div>
+                                        <div class="photoshow-setting-label-desc">Minimum thumbnail width in pixels</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="number" id="setting-thumbnailMinWidth" value="${config.thumbnailMinWidth}" min="0" max="500" step="1">
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Minimum Height</div>
+                                        <div class="photoshow-setting-label-desc">Minimum thumbnail height in pixels</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="number" id="setting-thumbnailMinHeight" value="${config.thumbnailMinHeight}" min="0" max="500" step="1">
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Enable for IMG elements</div>
+                                        <div class="photoshow-setting-label-desc">Show viewer for &lt;img&gt; tags</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-thumbnailTypes-img" ${config.thumbnailTypes?.img ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Enable for background images</div>
+                                        <div class="photoshow-setting-label-desc">Show viewer for CSS backgrounds</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-thumbnailTypes-bgImage" ${config.thumbnailTypes?.bgImage ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Enable for image links</div>
+                                        <div class="photoshow-setting-label-desc">Show viewer for links to images</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-thumbnailTypes-link" ${config.thumbnailTypes?.link ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="photoshow-setting-group">
+                                <h3>💾 Download Settings</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Filename Template</div>
+                                        <div class="photoshow-setting-label-desc">Use placeholders: &lt;c&gt; &lt;H&gt; &lt;w&gt; &lt;h&gt; &lt;e&gt; &lt;t&gt;</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="text" id="setting-downloadFilenameTemplate" value="${config.downloadFilenameTemplate}" style="min-width: 250px;">
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Always Ask Location</div>
+                                        <div class="photoshow-setting-label-desc">Prompt for save location</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-alwaysAskDownloadLocation" ${config.alwaysAskDownloadLocation ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Keyboard Settings Tab -->
+                        <div class="photoshow-tab-panel" data-panel="keyboard">
+                            <div class="photoshow-setting-group">
+                                <h3>⌨️ Keyboard Shortcuts</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Download (S)</div>
+                                        <div class="photoshow-setting-label-desc">Enable download shortcut</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-download" ${config.keyboardShortcuts?.download ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Copy (C)</div>
+                                        <div class="photoshow-setting-label-desc">Enable copy URL shortcut</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-copy" ${config.keyboardShortcuts?.copy ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Toggle Mode (V)</div>
+                                        <div class="photoshow-setting-label-desc">Enable mode toggle shortcut</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-toggleMode" ${config.keyboardShortcuts?.toggleMode ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">View Mode Shortcuts (A/F/L/M/P)</div>
+                                        <div class="photoshow-setting-label-desc">Enable mode selection shortcuts</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-viewModes" ${config.keyboardShortcuts?.autoMode ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Navigation (Arrow keys, Home, End, PgUp, PgDn)</div>
+                                        <div class="photoshow-setting-label-desc">Enable navigation shortcuts</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-navigation" ${config.keyboardShortcuts?.navigation ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Rotation (Shift+Ctrl+Arrows)</div>
+                                        <div class="photoshow-setting-label-desc">Enable rotation shortcuts</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-rotation" ${config.keyboardShortcuts?.rotation ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Flip (Alt+Ctrl+Arrows)</div>
+                                        <div class="photoshow-setting-label-desc">Enable flip shortcuts</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-keyboardShortcuts-flip" ${config.keyboardShortcuts?.flip ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Settings Tab -->
+                        <div class="photoshow-tab-panel" data-panel="advanced">
+                            <div class="photoshow-setting-group">
+                                <h3>🔬 Advanced Options</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Mark Viewed Images</div>
+                                        <div class="photoshow-setting-label-desc">Add visual indicator to viewed images</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-markViewedImages" ${config.markViewedImages ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Context Menu</div>
+                                        <div class="photoshow-setting-label-desc">Enable right-click menu items</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-contextMenuEnabled" ${config.contextMenuEnabled ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Scrolling Mode Threshold</div>
+                                        <div class="photoshow-setting-label-desc">Aspect ratio for scrolling mode</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="number" id="setting-scrollingModeThreshold" value="${config.scrollingModeThreshold}" min="1.0" max="5.0" step="0.1">
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">New Tab Behavior</div>
+                                        <div class="photoshow-setting-label-desc">Where to open new image tabs</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <select id="setting-newTabBehavior">
+                                            <option value="foreground" ${config.newTabBehavior === 'foreground' ? 'selected' : ''}>Foreground</option>
+                                            <option value="background" ${config.newTabBehavior === 'background' ? 'selected' : ''}>Background</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="photoshow-setting-group">
+                                <h3>📦 Settings Management</h3>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Export Settings</div>
+                                        <div class="photoshow-setting-label-desc">Copy all settings as JSON</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <button class="photoshow-btn photoshow-btn-secondary" id="btn-export-settings">Export</button>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Import Settings</div>
+                                        <div class="photoshow-setting-label-desc">Restore from JSON</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <button class="photoshow-btn photoshow-btn-secondary" id="btn-import-settings">Import</button>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Reset Global Settings</div>
+                                        <div class="photoshow-setting-label-desc">Restore default global settings</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <button class="photoshow-btn photoshow-btn-danger" id="btn-reset-global">Reset Global</button>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Reset Site Settings</div>
+                                        <div class="photoshow-setting-label-desc">Clear settings for this site</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <button class="photoshow-btn photoshow-btn-danger" id="btn-reset-site">Reset Site</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="photoshow-settings-footer">
+                        <div style="flex: 1;">
+                            <button class="photoshow-btn photoshow-btn-secondary" id="photoshow-close-settings">Cancel</button>
+                        </div>
+                        <button class="photoshow-btn photoshow-btn-primary" id="photoshow-save-settings">Save & Apply</button>
+                    </div>
+                </div>
             </div>
-            <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-                        background: rgba(0,0,0,0.5); z-index: 9999999;"></div>
         `;
 
         document.body.appendChild(dialog);
 
+        // Tab switching
+        const tabs = dialog.querySelectorAll('.photoshow-tab');
+        const panels = dialog.querySelectorAll('.photoshow-tab-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+
+                tabs.forEach(t => t.classList.remove('active'));
+                panels.forEach(p => p.classList.remove('active'));
+
+                tab.classList.add('active');
+                dialog.querySelector(`[data-panel="${tabName}"]`).classList.add('active');
+            });
+        });
+
+        // Save settings
+        dialog.querySelector('#photoshow-save-settings').addEventListener('click', () => {
+            const newConfig = {
+                enabled: dialog.querySelector('#setting-enabled').checked,
+                whitelistMode: dialog.querySelector('#setting-whitelistMode').checked,
+                colorScheme: dialog.querySelector('#setting-colorScheme').value,
+                transitionAnimation: dialog.querySelector('#setting-transitionAnimation').checked,
+                animationDuration: parseInt(dialog.querySelector('#setting-animationDuration').value),
+                showImageInfo: dialog.querySelector('#setting-showImageInfo').checked,
+                imageInfoItems: {
+                    caption: dialog.querySelector('#setting-imageInfoItems-caption').checked,
+                    dimensions: dialog.querySelector('#setting-imageInfoItems-dimensions').checked,
+                    format: dialog.querySelector('#setting-imageInfoItems-format').checked,
+                    fileSize: config.imageInfoItems?.fileSize || true
+                },
+                viewerTrigger: dialog.querySelector('#setting-viewerTrigger').value,
+                assistKey: dialog.querySelector('#setting-assistKey').value,
+                defaultViewMode: dialog.querySelector('#setting-defaultViewMode').value,
+                thumbnailMinWidth: parseInt(dialog.querySelector('#setting-thumbnailMinWidth').value),
+                thumbnailMinHeight: parseInt(dialog.querySelector('#setting-thumbnailMinHeight').value),
+                thumbnailTypes: {
+                    img: dialog.querySelector('#setting-thumbnailTypes-img').checked,
+                    bgImage: dialog.querySelector('#setting-thumbnailTypes-bgImage').checked,
+                    link: dialog.querySelector('#setting-thumbnailTypes-link').checked
+                },
+                downloadFilenameTemplate: dialog.querySelector('#setting-downloadFilenameTemplate').value,
+                alwaysAskDownloadLocation: dialog.querySelector('#setting-alwaysAskDownloadLocation').checked,
+                keyboardShortcuts: {
+                    download: dialog.querySelector('#setting-keyboardShortcuts-download').checked,
+                    copy: dialog.querySelector('#setting-keyboardShortcuts-copy').checked,
+                    toggleMode: dialog.querySelector('#setting-keyboardShortcuts-toggleMode').checked,
+                    autoMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    fitMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    liteMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    miniMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    panoramicMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    navigation: dialog.querySelector('#setting-keyboardShortcuts-navigation').checked,
+                    rotation: dialog.querySelector('#setting-keyboardShortcuts-rotation').checked,
+                    flip: dialog.querySelector('#setting-keyboardShortcuts-flip').checked
+                },
+                markViewedImages: dialog.querySelector('#setting-markViewedImages').checked,
+                contextMenuEnabled: dialog.querySelector('#setting-contextMenuEnabled').checked,
+                scrollingModeThreshold: parseFloat(dialog.querySelector('#setting-scrollingModeThreshold').value),
+                newTabBehavior: dialog.querySelector('#setting-newTabBehavior').value,
+                // Keep other settings that aren't in UI
+                viewerPositions: config.viewerPositions,
+                viewerExceptions: config.viewerExceptions,
+                hdImagePatterns: config.hdImagePatterns,
+                defaultDownloadFormat: config.defaultDownloadFormat
+            };
+
+            // Save to appropriate storage
+            saveGlobalConfig(newConfig);
+            state.config = newConfig;
+
+            GM_notification({
+                text: 'Settings saved successfully!',
+                title: 'PhotoShow',
+                timeout: 2000
+            });
+
+            document.body.removeChild(dialog);
+
+            // Reload page to apply settings
+            setTimeout(() => location.reload(), 500);
+        });
+
+        // Close button
         dialog.querySelector('#photoshow-close-settings').addEventListener('click', () => {
             document.body.removeChild(dialog);
+        });
+
+        // Close on overlay click
+        dialog.querySelector('#photoshow-settings-overlay').addEventListener('click', (e) => {
+            if (e.target.id === 'photoshow-settings-overlay') {
+                document.body.removeChild(dialog);
+            }
+        });
+
+        // Export settings
+        dialog.querySelector('#btn-export-settings').addEventListener('click', () => {
+            const settings = exportSettings();
+            const json = JSON.stringify(settings, null, 2);
+            GM_setClipboard(json, 'text');
+            GM_notification({
+                text: 'Settings exported to clipboard!',
+                title: 'PhotoShow',
+                timeout: 2000
+            });
+        });
+
+        // Import settings
+        dialog.querySelector('#btn-import-settings').addEventListener('click', () => {
+            const json = prompt('Paste your settings JSON:');
+            if (json) {
+                if (importSettings(json)) {
+                    setTimeout(() => {
+                        document.body.removeChild(dialog);
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        });
+
+        // Reset global settings
+        dialog.querySelector('#btn-reset-global').addEventListener('click', () => {
+            if (confirm('Are you sure you want to reset all global settings to defaults?')) {
+                saveGlobalConfig(DEFAULT_CONFIG);
+                GM_notification({
+                    text: 'Global settings reset to defaults',
+                    title: 'PhotoShow',
+                    timeout: 2000
+                });
+                setTimeout(() => location.reload(), 500);
+            }
+        });
+
+        // Reset site settings
+        dialog.querySelector('#btn-reset-site').addEventListener('click', () => {
+            if (confirm(`Are you sure you want to reset settings for ${window.location.hostname}?`)) {
+                GM_deleteValue(SITE_CONFIG_KEY);
+                GM_notification({
+                    text: `Site settings reset for ${window.location.hostname}`,
+                    title: 'PhotoShow',
+                    timeout: 2000
+                });
+                setTimeout(() => location.reload(), 500);
+            }
         });
     }
 
