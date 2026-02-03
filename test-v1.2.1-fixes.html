@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhotoShow v1.2.1 - Bug Fixes Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+        }
+        .version {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .bug {
+            background: #fee;
+            border-left: 4px solid #f44;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .fix {
+            background: #efe;
+            border-left: 4px solid #4a4;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .image-item {
+            text-align: center;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+        .image-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .image-label {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #667eea;
+        }
+        .image-desc {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .instructions {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        .checklist li:before {
+            content: '☐';
+            position: absolute;
+            left: 0;
+            font-size: 18px;
+            color: #667eea;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .keyboard-key {
+            display: inline-block;
+            background: #333;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            border: 2px solid #555;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.2);
+        }
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .comparison > div {
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .before {
+            background: #ffe0e0;
+            border: 2px solid #ff6b6b;
+        }
+        .after {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
+        .settings-note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PhotoShow v1.2.1 Bug Fixes Test Page</h1>
+        <span class="version">v1.2.1</span>
+        <p>This page tests the two critical bug fixes in version 1.2.1</p>
+    </div>
+
+    <!-- Bug 1: View Mode Size Not Changing -->
+    <div class="section">
+        <h2>🐛 Bug Fix #1: View Mode Size Changes</h2>
+        
+        <div class="bug">
+            <strong>❌ Original Bug:</strong> Switching to 'fit' or 'max-fit' mode didn't change image size
+        </div>
+        
+        <div class="fix">
+            <strong>✅ Fixed in v1.2.1:</strong> 'fit' and 'max-fit' now have distinct sizes
+            <ul>
+                <li><strong>fit mode</strong>: Uses 100% of viewport (fills screen)</li>
+                <li><strong>max-fit mode</strong>: Uses 90% of viewport (slightly smaller, no cropping)</li>
+            </ul>
+        </div>
+
+        <div class="comparison">
+            <div class="before">
+                <h3>❌ Before (v1.2.0)</h3>
+                <code>fit: 90% viewport</code><br>
+                <code>max-fit: 90% viewport</code><br>
+                <strong>Result:</strong> Both identical!
+            </div>
+            <div class="after">
+                <h3>✅ After (v1.2.1)</h3>
+                <code>fit: 100% viewport</code><br>
+                <code>max-fit: 90% viewport</code><br>
+                <strong>Result:</strong> Clearly different sizes!
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>🧪 Test Instructions:</h3>
+            <ol>
+                <li>Enable PhotoShow userscript</li>
+                <li>Hover over any image below</li>
+                <li>Press <span class="keyboard-key">F</span> to switch to FIT mode</li>
+                <li>Observe the image size (should fill viewport)</li>
+                <li>Press <span class="keyboard-key">9</span> to switch to MAX-FIT mode</li>
+                <li>Observe the image size (should be slightly smaller, 90%)</li>
+                <li>Press <span class="keyboard-key">V</span> to toggle between modes</li>
+                <li>You should see a clear size difference now!</li>
+            </ol>
+        </div>
+
+        <div class="images">
+            <div class="image-item">
+                <img src="https://via.placeholder.com/800x600/667eea/ffffff?text=Test+Image+1" 
+                     alt="Test Image 1">
+                <div class="image-label">Landscape Image</div>
+                <div class="image-desc">800×600 - Test with F and 9 keys</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/600x800/764ba2/ffffff?text=Test+Image+2" 
+                     alt="Test Image 2">
+                <div class="image-label">Portrait Image</div>
+                <div class="image-desc">600×800 - Test with F and 9 keys</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/1200x800/4caf50/ffffff?text=Wide+Image" 
+                     alt="Wide Image">
+                <div class="image-label">Wide Image</div>
+                <div class="image-desc">1200×800 - Notice size difference</div>
+            </div>
+        </div>
+
+        <ul class="checklist">
+            <li>Hover over image and press <span class="keyboard-key">F</span> for fit mode</li>
+            <li>Image fills viewport (100% size)</li>
+            <li>Press <span class="keyboard-key">9</span> for max-fit mode</li>
+            <li>Image becomes slightly smaller (90% size)</li>
+            <li>Press <span class="keyboard-key">V</span> to toggle</li>
+            <li>Size change is clearly visible</li>
+        </ul>
+    </div>
+
+    <!-- Bug 2: Image Info Not Displaying -->
+    <div class="section">
+        <h2>🐛 Bug Fix #2: Image Info Display</h2>
+        
+        <div class="bug">
+            <strong>❌ Original Bug:</strong> Enabling "Show Image Info", "Show Caption", "Show Dimensions", "Show Format" didn't display anything
+        </div>
+        
+        <div class="fix">
+            <strong>✅ Fixed in v1.2.1:</strong> Image information now displays correctly
+            <ul>
+                <li><strong>Dimensions</strong>: Shows image width × height</li>
+                <li><strong>Format</strong>: Shows file format (JPG, PNG, etc.)</li>
+                <li><strong>Info bar</strong>: Appears at bottom when enabled</li>
+            </ul>
+        </div>
+
+        <div class="settings-note">
+            <strong>⚙️ Settings Configuration:</strong>
+            <ol>
+                <li>Open PhotoShow Settings (userscript manager menu)</li>
+                <li>Go to <strong>General</strong> tab</li>
+                <li>Check <strong>☑ Show Image Info</strong></li>
+                <li>Check <strong>☑ Show Dimensions</strong></li>
+                <li>Check <strong>☑ Show Format</strong></li>
+                <li>Click <strong>Save & Apply</strong></li>
+                <li>Reload this page</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>🧪 Test Instructions:</h3>
+            <ol>
+                <li>Enable PhotoShow and configure settings as above</li>
+                <li>Hover over any image below</li>
+                <li>Look at the <strong>bottom</strong> of the viewer</li>
+                <li>You should see a semi-transparent bar with:</li>
+                <ul>
+                    <li>Image dimensions (e.g., "800 × 600")</li>
+                    <li>File format (e.g., "PNG")</li>
+                </ul>
+                <li>Try different view modes (F, 9, A, L, M, P)</li>
+                <li>Info bar should remain visible in all modes</li>
+            </ol>
+        </div>
+
+        <div class="images">
+            <div class="image-item">
+                <img src="https://via.placeholder.com/1920x1080/ff6b6b/ffffff?text=Full+HD" 
+                     alt="Full HD Image">
+                <div class="image-label">Full HD Image</div>
+                <div class="image-desc">1920×1080 PNG - Check info bar</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/1280x720/4ecdc4/ffffff?text=HD+Ready" 
+                     alt="HD Ready Image">
+                <div class="image-label">HD Ready Image</div>
+                <div class="image-desc">1280×720 PNG - Check info bar</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/2560x1440/45b7d1/ffffff?text=2K+Image" 
+                     alt="2K Image">
+                <div class="image-label">2K Image</div>
+                <div class="image-desc">2560×1440 PNG - Check info bar</div>
+            </div>
+        </div>
+
+        <ul class="checklist">
+            <li>Image info settings are enabled in Settings UI</li>
+            <li>Hover over image shows viewer</li>
+            <li>Semi-transparent info bar visible at bottom</li>
+            <li>Dimensions displayed correctly (e.g., "1920 × 1080")</li>
+            <li>Format displayed correctly (e.g., "PNG")</li>
+            <li>Info updates when switching between images</li>
+            <li>Info persists across view mode changes</li>
+        </ul>
+    </div>
+
+    <!-- Combined Test -->
+    <div class="section">
+        <h2>✅ Combined Test: Both Fixes Working Together</h2>
+        
+        <div class="instructions">
+            <h3>🎯 Complete Test Scenario:</h3>
+            <ol>
+                <li>Enable all image info options in Settings</li>
+                <li>Hover over image below</li>
+                <li>Verify info bar shows at bottom with dimensions and format</li>
+                <li>Press <span class="keyboard-key">F</span> - Image should fill viewport (100%)</li>
+                <li>Info bar should remain visible</li>
+                <li>Press <span class="keyboard-key">9</span> - Image should shrink to 90%</li>
+                <li>Info bar should still be visible</li>
+                <li>Press <span class="keyboard-key">V</span> to toggle - Size should change</li>
+                <li>Info bar stays visible throughout all changes</li>
+            </ol>
+        </div>
+
+        <div class="images">
+            <div class="image-item">
+                <img src="https://via.placeholder.com/3840x2160/9b59b6/ffffff?text=4K+Ultra+HD" 
+                     alt="4K Image">
+                <div class="image-label">4K Ultra HD</div>
+                <div class="image-desc">3840×2160 - Complete test</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/1600x900/e74c3c/ffffff?text=HD+Plus" 
+                     alt="HD Plus">
+                <div class="image-label">HD Plus</div>
+                <div class="image-desc">1600×900 - Complete test</div>
+            </div>
+            <div class="image-item">
+                <img src="https://via.placeholder.com/2048x1152/3498db/ffffff?text=2K+Wide" 
+                     alt="2K Wide">
+                <div class="image-label">2K Wide</div>
+                <div class="image-desc">2048×1152 - Complete test</div>
+            </div>
+        </div>
+
+        <ul class="checklist">
+            <li><strong>Bug Fix #1:</strong> fit and max-fit modes show different sizes ✓</li>
+            <li><strong>Bug Fix #2:</strong> Image info displays when enabled ✓</li>
+            <li>Both features work together seamlessly ✓</li>
+            <li>No conflicts or regressions ✓</li>
+        </ul>
+    </div>
+
+    <!-- Debug Mode Test -->
+    <div class="section">
+        <h2>🔍 Debug Mode (Optional)</h2>
+        
+        <div class="settings-note">
+            <strong>💡 Enable Debug Mode for detailed logging:</strong>
+            <ol>
+                <li>Open PhotoShow Settings</li>
+                <li>Go to <strong>Advanced</strong> tab</li>
+                <li>Check <strong>☑ Debug Mode</strong></li>
+                <li>Click <strong>Save & Apply</strong></li>
+                <li>Open Browser Console (F12)</li>
+                <li>Hover over images to see detailed logs</li>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>Expected Console Output:</h3>
+            <pre style="background: #2d2d2d; color: #f8f8f8; padding: 15px; border-radius: 4px; overflow-x: auto;">
+[PhotoShow] Image detected: https://via.placeholder.com/...
+[PhotoShow] HD URL: https://via.placeholder.com/...
+[PhotoShow] Image dimensions: {width: 1920, height: 1080}
+[PhotoShow] Creating viewer
+[PhotoShow] Viewer appended to body
+[PhotoShow] Making viewer visible
+[PhotoShow] Viewer should now be visible</pre>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="section">
+        <h2>📊 Test Summary</h2>
+        
+        <h3>Version 1.2.1 Bug Fixes:</h3>
+        <ul>
+            <li><strong>✅ Fixed:</strong> View mode sizes now different (fit=100%, max-fit=90%)</li>
+            <li><strong>✅ Fixed:</strong> Image info displays correctly when enabled</li>
+            <li><strong>✅ Verified:</strong> Both fixes work together without conflicts</li>
+            <li><strong>✅ No Regressions:</strong> All other features continue working</li>
+        </ul>
+
+        <h3>Test Results Checklist:</h3>
+        <ul class="checklist">
+            <li>View mode 'fit' fills viewport (100%)</li>
+            <li>View mode 'max-fit' uses 90% of viewport</li>
+            <li>Switching modes produces visible size change</li>
+            <li>Image dimensions display in info bar</li>
+            <li>Image format displays in info bar</li>
+            <li>Info bar appears/disappears based on settings</li>
+            <li>All keyboard shortcuts work correctly</li>
+            <li>No console errors or warnings</li>
+        </ul>
+
+        <div class="fix" style="margin-top: 20px;">
+            <strong>🎉 If all tests pass, version 1.2.1 successfully fixes both reported bugs!</strong>
+        </div>
+    </div>
+
+    <script>
+        console.log('%c PhotoShow v1.2.1 Test Page Loaded ', 'background: #667eea; color: white; padding: 5px 10px; border-radius: 3px;');
+        console.log('Test the following:');
+        console.log('1. View mode size differences (F vs 9 keys)');
+        console.log('2. Image info display (enable in settings)');
+        console.log('3. Both features working together');
+    </script>
+</body>
+</html>

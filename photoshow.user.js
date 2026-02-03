@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.2.0
+// @version      1.2.1
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -531,7 +531,8 @@
             return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
         }
         case 'fit':
-            return { mode: 'fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
+            // Fit mode - fills viewport as much as possible (100%)
+            return { mode: 'fit', maxWidth: viewport.width, maxHeight: viewport.height };
 
         case 'max-fit':
             // 90% fit mode - ensures image always fits within 90% of viewport without cropping

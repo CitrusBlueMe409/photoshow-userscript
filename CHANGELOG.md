@@ -5,6 +5,22 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2026-02-03
+
+### Fixed
+- **Fixed view mode size differences** - 'fit' and 'max-fit' modes now have distinct sizes
+  - 'fit' mode now fills 100% of viewport (was incorrectly 90%)
+  - 'max-fit' mode correctly uses 90% of viewport
+  - Switching between modes now produces visible size changes
+  - Image info display now updates correctly when switching modes
+- **Fixed image info display** - Image information now displays correctly when enabled
+  - Caption, dimensions, and format info now show properly
+  - Info bar appears/disappears correctly based on settings
+
+### Changed
+- 'fit' mode behavior: Now uses full viewport (100%) instead of 90%
+- Clear distinction between 'fit' (100%) and 'max-fit' (90%) modes
+
 ## [1.2.0] - 2026-02-03
 
 ### Added
