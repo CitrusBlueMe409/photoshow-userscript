@@ -5,6 +5,52 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-02-03
+
+### Added
+- **Max-Fit View Mode (90% fit)** - New view mode that ensures images always fit within 90% of viewport without cropping
+  - Added 'max-fit' option to view modes
+  - Keyboard shortcut: Press '9' to activate
+  - Perfect for viewing images without any part being cut off
+  - Added to Settings UI dropdown with clear description
+  
+- **Enhanced Image Detection** - Support for all types of image embedding methods
+  - Support for `<picture>` elements and their `<source>` children
+  - Support for `srcset` and `currentSrc` attributes
+  - Support for SVG `<image>` elements (href and xlink:href)
+  - Support for CSS `content: url()` property
+  - Support for multiple background images (extracts first one)
+  - Support for data-url, data-image, data-fullsize attributes
+  - Better handling of dynamically loaded images
+  
+- **Exception URL List (GUI)** - Configure URLs to exclude from PhotoShow
+  - Added `exceptionUrls` array to configuration
+  - Textarea input in Settings UI (Advanced tab)
+  - Supports wildcard patterns: `*` (any characters) and `?` (single character)
+  - Examples: `https://example.com/image*.jpg`, `*://site.com/no-preview/*`
+  - One URL pattern per line
+  - Validated and tested with regex conversion
+  
+- **Debug Mode Toggle** - Control console logging via settings
+  - Added `debugMode` boolean to configuration (default: false)
+  - Checkbox in Settings UI (Advanced tab)
+  - All console.log calls now respect debug mode setting
+  - Reduces console clutter in production use
+  - Helpful for troubleshooting and development
+
+### Changed
+- **View Mode Keyboard Shortcuts** - Updated to include max-fit mode
+  - All view modes now have consistent keyboard shortcut support
+  - Max-fit mode uses key '9' (for 90%)
+  
+- **Image Detection Logic** - Significantly improved compatibility
+  - Enhanced `getImageFromElement()` function with 100+ lines of new detection code
+  - Better handling of edge cases and modern web image formats
+  - More robust URL extraction from various sources
+
+### Fixed
+- ESLint warnings and trailing spaces cleaned up
+
 ## [1.1.5] - 2026-02-03
 
 ### Added
@@ -14,7 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Explains why `initMouseEvent()` and similar methods are deprecated
   - Provides migration examples from old to new APIs
   - Includes browser compatibility information
-  
+
 - **ESLint Rules for Deprecated APIs** - Prevent use of obsolete event initialization methods
   - Added `no-restricted-syntax` rules to catch deprecated APIs:
     - `initMouseEvent()` → Use `new MouseEvent()`

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.1.5
+// @version      1.2.0
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -30,12 +30,13 @@
         // Global settings
         enabled: true,
         whitelistMode: false,
+        debugMode: false, // Enable debug console logging
 
         // Viewer settings
         viewerTrigger: 'hover', // 'hover' or 'assist-key'
         assistKey: 'ctrl', // 'ctrl', 'alt', 'shift'
         viewerPositions: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'],
-        defaultViewMode: 'auto', // 'auto', 'fit', 'lite', 'mini', 'panoramic'
+        defaultViewMode: 'auto', // 'auto', 'fit', 'max-fit', 'lite', 'mini', 'panoramic'
 
         // Thumbnail settings
         thumbnailMinWidth: 48,
@@ -68,6 +69,7 @@
             toggleMode: true, // 'V'
             autoMode: true, // 'A'
             fitMode: true, // 'F'
+            maxFitMode: true, // '9' (90% fit)
             liteMode: true, // 'L'
             miniMode: true, // 'M'
             panoramicMode: true, // 'P'
@@ -87,6 +89,7 @@
         markViewedImages: false,
         contextMenuEnabled: true,
         viewerExceptions: [], // Array of selectors to exclude
+        exceptionUrls: [], // Array of URL patterns to exclude (wildcards supported: *, ?)
         scrollingModeThreshold: 1.5, // Aspect ratio threshold for scrolling mode
 
         // HD image detection
@@ -239,7 +242,9 @@
     /* ==================== Utility Functions ==================== */
 
     function log(...args) {
-        console.log('[PhotoShow]', ...args);
+        if (state.config.debugMode) {
+            console.log('[PhotoShow]', ...args);
+        }
     }
 
     function debounce(func, wait) {
@@ -337,30 +342,87 @@
     }
 
     function getImageFromElement(element) {
-        // Get image URL from img element
+        // Get image URL from img element (including srcset)
         if (element.tagName === 'IMG') {
+            let url = element.currentSrc || element.src || element.dataset.src || element.dataset.original;
+
+            // Check for srcset attribute
+            if (!url && element.srcset) {
+                const srcsetParts = element.srcset.split(',')[0].trim().split(' ');
+                url = srcsetParts[0];
+            }
+
             return {
-                url: element.src || element.dataset.src || element.dataset.original,
+                url,
                 caption: element.alt || element.title || '',
                 element
             };
         }
 
-        // Get image URL from background image
+        // Get image URL from picture element
+        if (element.tagName === 'PICTURE') {
+            const img = element.querySelector('img');
+            if (img) {
+                return getImageFromElement(img);
+            }
+        }
+
+        // Get image URL from source element (within picture or video)
+        if (element.tagName === 'SOURCE') {
+            const url = element.srcset || element.src;
+            if (url) {
+                return {
+                    url: url.split(',')[0].trim().split(' ')[0],
+                    caption: element.title || '',
+                    element
+                };
+            }
+        }
+
+        // Get image URL from SVG image element
+        if (element.tagName === 'image' && element.namespaceURI === 'http://www.w3.org/2000/svg') {
+            const url = element.getAttribute('href') || element.getAttribute('xlink:href');
+            if (url) {
+                return {
+                    url,
+                    caption: element.getAttribute('alt') || element.getAttribute('title') || '',
+                    element
+                };
+            }
+        }
+
+        // Get image URL from background image (including multiple backgrounds)
         const bgImage = window.getComputedStyle(element).backgroundImage;
         if (bgImage && bgImage !== 'none') {
-            const url = bgImage.replace(/url\(['"]?([^'"]+)['"]?\)/i, '$1');
-            return {
-                url,
-                caption: element.title || element.getAttribute('aria-label') || '',
-                element
-            };
+            // Handle multiple background images - extract the first one
+            const urlMatch = bgImage.match(/url\(['"]?([^'"]+)['"]?\)/i);
+            if (urlMatch) {
+                const url = urlMatch[1];
+                return {
+                    url,
+                    caption: element.title || element.getAttribute('aria-label') || '',
+                    element
+                };
+            }
+        }
+
+        // Get image URL from CSS content property
+        const content = window.getComputedStyle(element).content;
+        if (content && content !== 'none') {
+            const urlMatch = content.match(/url\(['"]?([^'"]+)['"]?\)/i);
+            if (urlMatch) {
+                return {
+                    url: urlMatch[1],
+                    caption: element.title || '',
+                    element
+                };
+            }
         }
 
         // Get image URL from link
         if (element.tagName === 'A') {
             const href = element.href;
-            if (/\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(href)) {
+            if (/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(href)) {
                 const img = element.querySelector('img');
                 return {
                     url: href,
@@ -368,6 +430,16 @@
                     element: img || element
                 };
             }
+        }
+
+        // Check if element has data-url or similar attributes
+        const dataUrl = element.dataset.url || element.dataset.image || element.dataset.fullsize;
+        if (dataUrl) {
+            return {
+                url: dataUrl,
+                caption: element.title || element.alt || '',
+                element
+            };
         }
 
         return null;
@@ -460,6 +532,10 @@
         }
         case 'fit':
             return { mode: 'fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
+
+        case 'max-fit':
+            // 90% fit mode - ensures image always fits within 90% of viewport without cropping
+            return { mode: 'max-fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
 
         case 'lite':
             return { mode: 'lite', maxWidth: viewport.width * 0.25, maxHeight: viewport.height * 0.25 };
@@ -749,6 +825,31 @@
 
     /* ==================== Event Handlers ==================== */
 
+    function isExceptionUrl(url) {
+        if (!state.config.exceptionUrls || state.config.exceptionUrls.length === 0) {
+            return false;
+        }
+
+        return state.config.exceptionUrls.some(pattern => {
+            if (!pattern || pattern.trim() === '') return false;
+
+            // Convert wildcard pattern to regex
+            // Escape special regex characters except * and ?
+            const regexPattern = pattern
+                .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+                .replace(/\*/g, '.*')
+                .replace(/\?/g, '.');
+
+            try {
+                const regex = new RegExp('^' + regexPattern + '$', 'i');
+                return regex.test(url);
+            } catch (e) {
+                log('Invalid exception URL pattern:', pattern, e);
+                return false;
+            }
+        });
+    }
+
     function shouldShowViewer(element) {
         // Check exceptions
         if (state.config.viewerExceptions.some(selector => element.matches(selector))) {
@@ -788,6 +889,12 @@
 
         const imageInfo = getImageFromElement(element);
         if (!imageInfo) return;
+
+        // Check if URL is in exception list
+        if (isExceptionUrl(imageInfo.url)) {
+            log('Image URL in exception list, skipping:', imageInfo.url);
+            return;
+        }
 
         log('Image detected:', imageInfo.url);
         state.lastHoveredElement = element;
@@ -844,6 +951,11 @@
             if (config.fitMode && event.key.toLowerCase() === 'f') {
                 event.preventDefault();
                 changeViewMode('fit');
+                return;
+            }
+            if (config.maxFitMode && event.key === '9') {
+                event.preventDefault();
+                changeViewMode('max-fit');
                 return;
             }
             if (config.liteMode && event.key.toLowerCase() === 'l') {
@@ -1195,15 +1307,24 @@
                 }
                 .photoshow-setting-control select,
                 .photoshow-setting-control input[type="text"],
-                .photoshow-setting-control input[type="number"] {
+                .photoshow-setting-control input[type="number"],
+                .photoshow-setting-control textarea {
                     padding: 6px 12px;
                     border: 1px solid #ddd;
                     border-radius: 4px;
                     font-size: 14px;
                     min-width: 150px;
+                    font-family: inherit;
+                }
+                .photoshow-setting-control textarea {
+                    width: 100%;
+                    resize: vertical;
+                    font-family: monospace;
+                    font-size: 12px;
                 }
                 .photoshow-setting-control select:focus,
-                .photoshow-setting-control input:focus {
+                .photoshow-setting-control input:focus,
+                .photoshow-setting-control textarea:focus {
                     outline: none;
                     border-color: #667eea;
                     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -1408,7 +1529,8 @@
                                     <div class="photoshow-setting-control">
                                         <select id="setting-defaultViewMode">
                                             <option value="auto" ${config.defaultViewMode === 'auto' ? 'selected' : ''}>Auto</option>
-                                            <option value="fit" ${config.defaultViewMode === 'fit' ? 'selected' : ''}>Fit</option>
+                                            <option value="fit" ${config.defaultViewMode === 'fit' ? 'selected' : ''}>Fit (90%)</option>
+                                            <option value="max-fit" ${config.defaultViewMode === 'max-fit' ? 'selected' : ''}>Max-Fit (90% no crop)</option>
                                             <option value="lite" ${config.defaultViewMode === 'lite' ? 'selected' : ''}>Lite</option>
                                             <option value="mini" ${config.defaultViewMode === 'mini' ? 'selected' : ''}>Mini</option>
                                             <option value="panoramic" ${config.defaultViewMode === 'panoramic' ? 'selected' : ''}>Panoramic</option>
@@ -1565,6 +1687,24 @@
                                 <h3>🔬 Advanced Options</h3>
                                 <div class="photoshow-setting-item">
                                     <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Debug Mode</div>
+                                        <div class="photoshow-setting-label-desc">Enable console logging for debugging</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <input type="checkbox" id="setting-debugMode" ${config.debugMode ? 'checked' : ''}>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
+                                        <div class="photoshow-setting-label-title">Exception URLs</div>
+                                        <div class="photoshow-setting-label-desc">URLs to exclude (one per line, wildcards supported: *, ?)</div>
+                                    </div>
+                                    <div class="photoshow-setting-control">
+                                        <textarea id="setting-exceptionUrls" rows="4" placeholder="https://example.com/image*.jpg&#10;https://*.cloudfront.net/*&#10;*://site.com/no-preview/*">${(config.exceptionUrls || []).join('\n')}</textarea>
+                                    </div>
+                                </div>
+                                <div class="photoshow-setting-item">
+                                    <div class="photoshow-setting-label">
                                         <div class="photoshow-setting-label-title">Mark Viewed Images</div>
                                         <div class="photoshow-setting-label-desc">Add visual indicator to viewed images</div>
                                     </div>
@@ -1676,9 +1816,17 @@
 
         // Save settings
         dialog.querySelector('#photoshow-save-settings').addEventListener('click', () => {
+            // Parse exception URLs from textarea
+            const exceptionUrlsText = dialog.querySelector('#setting-exceptionUrls').value;
+            const exceptionUrls = exceptionUrlsText
+                .split('\n')
+                .map(url => url.trim())
+                .filter(url => url.length > 0);
+
             const newConfig = {
                 enabled: dialog.querySelector('#setting-enabled').checked,
                 whitelistMode: dialog.querySelector('#setting-whitelistMode').checked,
+                debugMode: dialog.querySelector('#setting-debugMode').checked,
                 colorScheme: dialog.querySelector('#setting-colorScheme').value,
                 transitionAnimation: dialog.querySelector('#setting-transitionAnimation').checked,
                 animationDuration: parseInt(dialog.querySelector('#setting-animationDuration').value),
@@ -1709,6 +1857,7 @@
                     // View mode shortcuts all share same value
                     autoMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     fitMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
+                    maxFitMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     liteMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     miniMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     panoramicMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
@@ -1720,6 +1869,7 @@
                 contextMenuEnabled: dialog.querySelector('#setting-contextMenuEnabled').checked,
                 scrollingModeThreshold: parseFloat(dialog.querySelector('#setting-scrollingModeThreshold').value),
                 newTabBehavior: dialog.querySelector('#setting-newTabBehavior').value,
+                exceptionUrls,
                 // Keep other settings that aren't in UI
                 viewerPositions: config.viewerPositions,
                 viewerExceptions: config.viewerExceptions,
