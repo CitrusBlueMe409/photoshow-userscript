@@ -25,18 +25,18 @@
     'use strict';
 
     /* ==================== Configuration System ==================== */
-    
+
     const DEFAULT_CONFIG = {
         // Global settings
         enabled: true,
         whitelistMode: false,
-        
+
         // Viewer settings
         viewerTrigger: 'hover', // 'hover' or 'assist-key'
         assistKey: 'ctrl', // 'ctrl', 'alt', 'shift'
         viewerPositions: ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'center'],
         defaultViewMode: 'auto', // 'auto', 'fit', 'lite', 'mini', 'panoramic'
-        
+
         // Thumbnail settings
         thumbnailMinWidth: 48,
         thumbnailMinHeight: 48,
@@ -45,7 +45,7 @@
             bgImage: true,
             link: true
         },
-        
+
         // Image info display
         showImageInfo: true,
         imageInfoItems: {
@@ -54,12 +54,12 @@
             format: true,
             fileSize: true
         },
-        
+
         // Visual settings
         colorScheme: 'dark', // 'light' or 'dark'
         transitionAnimation: true,
         animationDuration: 300, // milliseconds
-        
+
         // Keyboard shortcuts
         keyboardShortcuts: {
             download: true, // 'S'
@@ -74,20 +74,20 @@
             rotation: true, // Shift+Ctrl+arrows
             flip: true // Alt+Ctrl+arrows
         },
-        
+
         // Download settings
         downloadFilenameTemplate: '<c>_<w>x<h>.<e>',
         // Placeholders: <c>=caption, <H>=hostname, <h>=height, <w>=width, <e>=extension, <t>=timestamp
         alwaysAskDownloadLocation: false,
         defaultDownloadFormat: 'original', // 'original', 'jpg', 'png', 'webp'
-        
+
         // Advanced settings
         newTabBehavior: 'background', // 'foreground' or 'background'
         markViewedImages: false,
         contextMenuEnabled: true,
         viewerExceptions: [], // Array of selectors to exclude
         scrollingModeThreshold: 1.5, // Aspect ratio threshold for scrolling mode
-        
+
         // HD image detection
         hdImagePatterns: [
             { find: /\/s\d+(-c)?\//, replace: '/s0/' }, // Google
@@ -106,59 +106,59 @@
     // Site-specific settings storage
     const SITE_CONFIG_KEY = `photoshow_site_${window.location.hostname}`;
     const GLOBAL_CONFIG_KEY = 'photoshow_global_config';
-    
+
     // Get merged configuration (site-specific overrides global)
     function getConfig() {
         const globalConfig = GM_getValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
         const siteConfig = GM_getValue(SITE_CONFIG_KEY, {});
         return { ...globalConfig, ...siteConfig };
     }
-    
+
     function saveGlobalConfig(config) {
         GM_setValue(GLOBAL_CONFIG_KEY, config);
     }
-    
+
     function saveSiteConfig(config) {
         GM_setValue(SITE_CONFIG_KEY, config);
     }
-    
+
     function exportSettings() {
         const globalConfig = GM_getValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
         const allSiteKeys = GM_listValues().filter(key => key.startsWith('photoshow_site_'));
         const siteConfigs = {};
-        
+
         allSiteKeys.forEach(key => {
             const hostname = key.replace('photoshow_site_', '');
             siteConfigs[hostname] = GM_getValue(key, {});
         });
-        
+
         return {
             version: '1.0.0',
             global: globalConfig,
             sites: siteConfigs
         };
     }
-    
+
     function importSettings(settingsJson) {
         try {
             const settings = JSON.parse(settingsJson);
-            
+
             if (settings.global) {
                 saveGlobalConfig(settings.global);
             }
-            
+
             if (settings.sites) {
                 Object.keys(settings.sites).forEach(hostname => {
                     GM_setValue(`photoshow_site_${hostname}`, settings.sites[hostname]);
                 });
             }
-            
+
             GM_notification({
                 text: 'Settings imported successfully!',
                 title: 'PhotoShow',
                 timeout: 3000
             });
-            
+
             return true;
         } catch (e) {
             GM_notification({
@@ -171,7 +171,7 @@
     }
 
     /* ==================== State Management ==================== */
-    
+
     const state = {
         config: getConfig(),
         currentViewer: null,
@@ -186,11 +186,11 @@
     };
 
     /* ==================== Utility Functions ==================== */
-    
+
     function log(...args) {
         console.log('[PhotoShow]', ...args);
     }
-    
+
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -202,7 +202,7 @@
             timeout = setTimeout(later, wait);
         };
     }
-    
+
     function getImageDimensions(url) {
         return new Promise((resolve) => {
             const img = new Image();
@@ -211,27 +211,28 @@
             img.src = url;
         });
     }
-    
+
     function getImageFormat(url) {
         const ext = url.split('.').pop().split('?')[0].toLowerCase();
         const formats = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
         return formats.includes(ext) ? ext : 'jpg';
     }
-    
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
+
+    // Format file size for display (TODO: implement file size fetching)
+    // function formatFileSize(bytes) {
+    //     if (bytes === 0) return '0 B';
+    //     const k = 1024;
+    //     const sizes = ['B', 'KB', 'MB', 'GB'];
+    //     const i = Math.floor(Math.log(bytes) / Math.log(k));
+    //     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    // }
+
     function generateFilename(imageUrl, caption, width, height) {
         const template = state.config.downloadFilenameTemplate;
         const hostname = window.location.hostname;
         const timestamp = Date.now();
         const format = getImageFormat(imageUrl);
-        
+
         let filename = template
             .replace(/<c>/g, caption || 'image')
             .replace(/<H>/g, hostname)
@@ -239,66 +240,66 @@
             .replace(/<w>/g, width)
             .replace(/<e>/g, format)
             .replace(/<t>/g, timestamp);
-        
+
         // Sanitize filename
         filename = filename.replace(/[<>:"/\\|?*]/g, '_');
-        
+
         return filename;
     }
 
     /* ==================== HD Image Detection ==================== */
-    
+
     function detectHDImageUrl(originalUrl) {
         if (!originalUrl) return null;
-        
+
         let hdUrl = originalUrl;
-        
+
         // Apply HD patterns
         state.config.hdImagePatterns.forEach(pattern => {
             if (pattern.find.test(hdUrl)) {
                 hdUrl = hdUrl.replace(pattern.find, pattern.replace);
             }
         });
-        
+
         // Check if URL was modified
         if (hdUrl !== originalUrl) {
             return hdUrl;
         }
-        
+
         // Try to detect size parameters in URL
         const sizeParams = ['s=', 'size=', 'w=', 'width=', 'h=', 'height='];
         const url = new URL(hdUrl, window.location.href);
-        
+
         sizeParams.forEach(param => {
             if (url.searchParams.has(param)) {
                 url.searchParams.delete(param);
             }
         });
-        
+
         return url.toString();
     }
-    
+
     function getImageFromElement(element) {
         // Get image URL from img element
         if (element.tagName === 'IMG') {
             return {
                 url: element.src || element.dataset.src || element.dataset.original,
                 caption: element.alt || element.title || '',
-                element: element
+                element
             };
         }
-        
+
         // Get image URL from background image
         const bgImage = window.getComputedStyle(element).backgroundImage;
         if (bgImage && bgImage !== 'none') {
             const url = bgImage.replace(/url\(['"]?([^'"]+)['"]?\)/i, '$1');
             return {
-                url: url,
+                url,
                 caption: element.title || element.getAttribute('aria-label') || '',
-                element: element
+                element
             };
         }
-        
+
         // Get image URL from link
         if (element.tagName === 'A') {
             const href = element.href;
@@ -311,17 +312,17 @@
                 };
             }
         }
-        
+
         return null;
     }
 
     /* ==================== Viewer Creation and Display ==================== */
-    
+
     function createViewer() {
         const viewer = document.createElement('div');
         viewer.id = 'photoshow-viewer';
         viewer.className = `photoshow-viewer photoshow-${state.config.colorScheme}`;
-        
+
         viewer.innerHTML = `
             <div class="photoshow-viewer-image-container">
                 <img class="photoshow-viewer-image" />
@@ -339,106 +340,106 @@
                 <span class="photoshow-mode-indicator"></span>
             </div>
         `;
-        
+
         return viewer;
     }
-    
+
     function calculateViewerPosition(thumbnailElement, viewerWidth, viewerHeight) {
         const rect = thumbnailElement.getBoundingClientRect();
         const viewport = {
             width: window.innerWidth,
             height: window.innerHeight
         };
-        
+
         const positions = state.config.viewerPositions;
         let bestPosition = null;
         let maxScore = -1;
-        
+
         // Calculate scores for each allowed position
         const positionCoords = {
             'top-left': { x: rect.left, y: rect.top - viewerHeight - 10 },
             'top-right': { x: rect.right - viewerWidth, y: rect.top - viewerHeight - 10 },
             'bottom-left': { x: rect.left, y: rect.bottom + 10 },
             'bottom-right': { x: rect.right - viewerWidth, y: rect.bottom + 10 },
-            'center': { x: (viewport.width - viewerWidth) / 2, y: (viewport.height - viewerHeight) / 2 }
+            center: { x: (viewport.width - viewerWidth) / 2, y: (viewport.height - viewerHeight) / 2 }
         };
-        
+
         positions.forEach(pos => {
             const coords = positionCoords[pos];
             if (!coords) return;
-            
+
             // Calculate how much of the viewer is visible
             const visibleX = Math.max(0, Math.min(coords.x + viewerWidth, viewport.width) - Math.max(coords.x, 0));
             const visibleY = Math.max(0, Math.min(coords.y + viewerHeight, viewport.height) - Math.max(coords.y, 0));
             const visibleArea = visibleX * visibleY;
             const totalArea = viewerWidth * viewerHeight;
             const score = visibleArea / totalArea;
-            
+
             if (score > maxScore) {
                 maxScore = score;
                 bestPosition = { position: pos, x: coords.x, y: coords.y };
             }
         });
-        
+
         return bestPosition || { position: 'center', x: positionCoords.center.x, y: positionCoords.center.y };
     }
-    
+
     function determineViewMode(imageWidth, imageHeight) {
         const viewport = {
             width: window.innerWidth,
             height: window.innerHeight
         };
-        
+
         const currentMode = state.currentViewMode || state.config.defaultViewMode;
-        
+
         switch (currentMode) {
-            case 'auto':
-                // Automatically decide based on image and viewport
-                const aspectRatio = imageWidth / imageHeight;
-                if (aspectRatio > state.config.scrollingModeThreshold || aspectRatio < 1 / state.config.scrollingModeThreshold) {
-                    return { mode: 'auto-scroll', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
-                }
-                return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
-            
-            case 'fit':
-                return { mode: 'fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
-            
-            case 'lite':
-                return { mode: 'lite', maxWidth: viewport.width * 0.25, maxHeight: viewport.height * 0.25 };
-            
-            case 'mini':
-                return { mode: 'mini', maxWidth: viewport.width * 0.125, maxHeight: viewport.height * 0.125 };
-            
-            case 'panoramic':
-                return { mode: 'panoramic', maxWidth: imageWidth, maxHeight: imageHeight };
-            
-            default:
-                return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+        case 'auto': {
+            // Automatically decide based on image and viewport
+            const aspectRatio = imageWidth / imageHeight;
+            if (aspectRatio > state.config.scrollingModeThreshold || aspectRatio < 1 / state.config.scrollingModeThreshold) {
+                return { mode: 'auto-scroll', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+            }
+            return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
+        }
+        case 'fit':
+            return { mode: 'fit', maxWidth: viewport.width * 0.9, maxHeight: viewport.height * 0.9 };
+
+        case 'lite':
+            return { mode: 'lite', maxWidth: viewport.width * 0.25, maxHeight: viewport.height * 0.25 };
+
+        case 'mini':
+            return { mode: 'mini', maxWidth: viewport.width * 0.125, maxHeight: viewport.height * 0.125 };
+
+        case 'panoramic':
+            return { mode: 'panoramic', maxWidth: imageWidth, maxHeight: imageHeight };
+
+        default:
+            return { mode: 'auto-fit', maxWidth: viewport.width * 0.8, maxHeight: viewport.height * 0.8 };
         }
     }
-    
+
     async function showViewer(imageInfo, thumbnailElement) {
         // Check if viewer should be shown
         if (!state.config.enabled) return;
         if (state.config.whitelistMode && !GM_getValue(SITE_CONFIG_KEY, null)) return;
-        
+
         // Get HD image URL
         const hdUrl = detectHDImageUrl(imageInfo.url);
-        
+
         // Get image dimensions
         const dimensions = await getImageDimensions(hdUrl);
         if (dimensions.width === 0 || dimensions.height === 0) return;
-        
+
         // Create viewer if it doesn't exist
         if (!state.currentViewer) {
             state.currentViewer = createViewer();
             document.body.appendChild(state.currentViewer);
         }
-        
+
         const viewer = state.currentViewer;
         const viewerImg = viewer.querySelector('.photoshow-viewer-image');
-        const viewportMask = viewer.querySelector('.photoshow-viewport-mask');
-        
+        // const viewportMask = viewer.querySelector('.photoshow-viewport-mask'); // TODO: implement scrolling mode
+
         // Determine view mode and dimensions
         const viewMode = determineViewMode(dimensions.width, dimensions.height);
         const scale = Math.min(
@@ -446,71 +447,71 @@
             viewMode.maxHeight / dimensions.height,
             1
         );
-        
+
         const displayWidth = dimensions.width * scale;
         const displayHeight = dimensions.height * scale;
-        
+
         // Set image
         viewerImg.src = hdUrl;
         viewerImg.style.width = displayWidth + 'px';
         viewerImg.style.height = displayHeight + 'px';
-        
+
         // Set viewer dimensions
         viewer.style.width = displayWidth + 'px';
         viewer.style.height = displayHeight + 'px';
-        
+
         // Calculate position
         const position = calculateViewerPosition(thumbnailElement, displayWidth, displayHeight);
         viewer.style.left = position.x + 'px';
         viewer.style.top = position.y + 'px';
-        
+
         // Update image info
         if (state.config.showImageInfo) {
             const captionEl = viewer.querySelector('.photoshow-info-caption');
             const dimensionsEl = viewer.querySelector('.photoshow-info-dimensions');
             const formatEl = viewer.querySelector('.photoshow-info-format');
-            const sizeEl = viewer.querySelector('.photoshow-info-size');
-            
+            // const sizeEl = viewer.querySelector('.photoshow-info-size'); // TODO: implement file size fetching
+
             if (state.config.imageInfoItems.caption) {
                 captionEl.textContent = imageInfo.caption || '';
                 captionEl.style.display = imageInfo.caption ? 'block' : 'none';
             }
-            
+
             if (state.config.imageInfoItems.dimensions) {
                 dimensionsEl.textContent = `${dimensions.width} × ${dimensions.height}`;
             }
-            
+
             if (state.config.imageInfoItems.format) {
                 formatEl.textContent = getImageFormat(hdUrl).toUpperCase();
             }
-            
-            viewer.querySelector('.photoshow-viewer-info').style.display = 
+
+            viewer.querySelector('.photoshow-viewer-info').style.display =
                 state.config.showImageInfo ? 'block' : 'none';
         }
-        
+
         // Update mode indicator
         const modeIndicator = viewer.querySelector('.photoshow-mode-indicator');
         modeIndicator.textContent = (state.currentViewMode || state.config.defaultViewMode).toUpperCase();
-        
+
         // Show viewer with animation
         viewer.classList.add('photoshow-visible');
         if (state.config.transitionAnimation) {
             viewer.style.transition = `opacity ${state.config.animationDuration}ms ease-in-out`;
         }
-        
+
         // Mark as viewed
         if (state.config.markViewedImages) {
             state.viewedImages.add(hdUrl);
             thumbnailElement.classList.add('photoshow-viewed');
         }
-        
+
         // Store current image info
         viewer.dataset.imageUrl = hdUrl;
         viewer.dataset.imageWidth = dimensions.width;
         viewer.dataset.imageHeight = dimensions.height;
         viewer.dataset.imageCaption = imageInfo.caption || 'image';
     }
-    
+
     function hideViewer() {
         if (state.currentViewer) {
             state.currentViewer.classList.remove('photoshow-visible');
@@ -523,21 +524,21 @@
     }
 
     /* ==================== Image Actions ==================== */
-    
+
     function downloadImage() {
         if (!state.currentViewer) return;
-        
+
         const url = state.currentViewer.dataset.imageUrl;
         const width = state.currentViewer.dataset.imageWidth;
         const height = state.currentViewer.dataset.imageHeight;
         const caption = state.currentViewer.dataset.imageCaption;
-        
+
         if (!url) return;
-        
+
         const filename = generateFilename(url, caption, width, height);
-        
+
         GM_download({
-            url: url,
+            url,
             name: filename,
             onload: () => {
                 GM_notification({
@@ -555,70 +556,70 @@
             }
         });
     }
-    
+
     function copyImage() {
         if (!state.currentViewer) return;
-        
+
         const url = state.currentViewer.dataset.imageUrl;
         if (!url) return;
-        
+
         // Copy URL to clipboard (image data copying requires different approach)
         GM_setClipboard(url, 'text');
-        
+
         GM_notification({
             text: 'Image URL copied to clipboard',
             title: 'PhotoShow',
             timeout: 2000
         });
     }
-    
+
     function rotateImage(direction) {
         if (!state.currentViewer) return;
-        
+
         state.currentRotation += (direction === 'left' ? -90 : 90);
         state.currentRotation = ((state.currentRotation % 360) + 360) % 360;
-        
+
         updateImageTransform();
     }
-    
+
     function flipImage(direction) {
         if (!state.currentViewer) return;
-        
+
         if (direction === 'horizontal') {
             state.currentFlipH = !state.currentFlipH;
         } else {
             state.currentFlipV = !state.currentFlipV;
         }
-        
+
         updateImageTransform();
     }
-    
+
     function updateImageTransform() {
         if (!state.currentViewer) return;
-        
+
         const img = state.currentViewer.querySelector('.photoshow-viewer-image');
         const transforms = [];
-        
+
         if (state.currentRotation !== 0) {
             transforms.push(`rotate(${state.currentRotation}deg)`);
         }
-        
+
         if (state.currentFlipH) {
             transforms.push('scaleX(-1)');
         }
-        
+
         if (state.currentFlipV) {
             transforms.push('scaleY(-1)');
         }
-        
+
         img.style.transform = transforms.join(' ');
     }
-    
+
     function changeViewMode(mode) {
         if (state.currentViewMode !== mode) {
             state.previousViewMode = state.currentViewMode;
             state.currentViewMode = mode;
-            
+
             // Re-show viewer with new mode
             if (state.currentViewer && state.lastHoveredElement) {
                 const imageInfo = getImageFromElement(state.lastHoveredElement);
@@ -628,13 +629,13 @@
             }
         }
     }
-    
+
     function toggleViewMode() {
         if (state.previousViewMode) {
             const temp = state.currentViewMode;
             state.currentViewMode = state.previousViewMode;
             state.previousViewMode = temp;
-            
+
             // Re-show viewer
             if (state.currentViewer && state.lastHoveredElement) {
                 const imageInfo = getImageFromElement(state.lastHoveredElement);
@@ -646,81 +647,81 @@
     }
 
     /* ==================== Event Handlers ==================== */
-    
+
     function shouldShowViewer(element) {
         // Check exceptions
         if (state.config.viewerExceptions.some(selector => element.matches(selector))) {
             return false;
         }
-        
+
         // Check thumbnail size
         const rect = element.getBoundingClientRect();
         if (rect.width < state.config.thumbnailMinWidth || rect.height < state.config.thumbnailMinHeight) {
             return false;
         }
-        
+
         // Check thumbnail type
         if (element.tagName === 'IMG' && !state.config.thumbnailTypes.img) return false;
         if (element.tagName === 'A' && !state.config.thumbnailTypes.link) return false;
-        
+
         const bgImage = window.getComputedStyle(element).backgroundImage;
         if (bgImage !== 'none' && !state.config.thumbnailTypes.bgImage) return false;
-        
+
         return true;
     }
-    
+
     const handleMouseOver = debounce(function(event) {
         const element = event.target;
-        
+
         if (!shouldShowViewer(element)) return;
-        
+
         const imageInfo = getImageFromElement(element);
         if (!imageInfo) return;
-        
+
         state.lastHoveredElement = element;
         showViewer(imageInfo, element);
     }, 100);
-    
+
     function handleMouseOut(event) {
-        const element = event.target;
+        // const element = event.target; // Currently unused
         const related = event.relatedTarget;
-        
+
         // Don't hide if moving to viewer
         if (related && (related === state.currentViewer || state.currentViewer?.contains(related))) {
             return;
         }
-        
+
         hideViewer();
     }
-    
+
     function handleKeyDown(event) {
         if (!state.currentViewer || !state.currentViewer.classList.contains('photoshow-visible')) {
             return;
         }
-        
+
         const config = state.config.keyboardShortcuts;
-        
+
         // Download (S)
         if (config.download && event.key.toLowerCase() === 's' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
             event.preventDefault();
             downloadImage();
             return;
         }
-        
+
         // Copy (C)
         if (config.copy && event.key.toLowerCase() === 'c' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
             event.preventDefault();
             copyImage();
             return;
         }
-        
+
         // Toggle mode (V)
         if (config.toggleMode && event.key.toLowerCase() === 'v' && !event.ctrlKey && !event.altKey && !event.shiftKey) {
             event.preventDefault();
             toggleViewMode();
             return;
         }
-        
+
         // View modes
         if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
             if (config.autoMode && event.key.toLowerCase() === 'a') {
@@ -749,7 +750,7 @@
                 return;
             }
         }
-        
+
         // Rotation (Shift+Ctrl+Arrow)
         if (config.rotation && event.shiftKey && event.ctrlKey && !event.altKey) {
             if (event.key === 'ArrowLeft') {
@@ -763,7 +764,7 @@
                 return;
             }
         }
-        
+
         // Flip (Alt+Ctrl+Arrow)
         if (config.flip && event.altKey && event.ctrlKey && !event.shiftKey) {
             if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -774,13 +775,12 @@
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
                 event.preventDefault();
                 flipImage('vertical');
-                return;
             }
         }
     }
 
     /* ==================== Styles ==================== */
-    
+
     function injectStyles() {
         const style = document.createElement('style');
         style.textContent = `
@@ -886,19 +886,19 @@
                 opacity: 0.7;
             }
         `;
-        
+
         document.head.appendChild(style);
     }
 
     /* ==================== Context Menu ==================== */
-    
+
     function registerContextMenu() {
         if (!state.config.contextMenuEnabled) return;
-        
+
         GM_registerMenuCommand('PhotoShow Settings', () => {
             openSettingsDialog();
         });
-        
+
         GM_registerMenuCommand('Export Settings', () => {
             const settings = exportSettings();
             const json = JSON.stringify(settings, null, 2);
@@ -909,7 +909,7 @@
                 timeout: 3000
             });
         });
-        
+
         GM_registerMenuCommand('Import Settings', () => {
             const json = prompt('Paste your settings JSON:');
             if (json) {
@@ -917,7 +917,7 @@
                 location.reload();
             }
         });
-        
+
         GM_registerMenuCommand('Reset Global Settings', () => {
             if (confirm('Are you sure you want to reset all global settings to defaults?')) {
                 saveGlobalConfig(DEFAULT_CONFIG);
@@ -929,7 +929,7 @@
                 location.reload();
             }
         });
-        
+
         GM_registerMenuCommand('Reset Site Settings', () => {
             if (confirm(`Are you sure you want to reset settings for ${window.location.hostname}?`)) {
                 GM_deleteValue(SITE_CONFIG_KEY);
@@ -941,7 +941,7 @@
                 location.reload();
             }
         });
-        
+
         GM_registerMenuCommand('Toggle PhotoShow', () => {
             state.config.enabled = !state.config.enabled;
             saveSiteConfig({ enabled: state.config.enabled });
@@ -952,7 +952,7 @@
             });
         });
     }
-    
+
     function openSettingsDialog() {
         // Create a simple settings UI
         const dialog = document.createElement('div');
@@ -968,36 +968,36 @@
             <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
                         background: rgba(0,0,0,0.5); z-index: 9999999;"></div>
         `;
-        
+
         document.body.appendChild(dialog);
-        
+
         dialog.querySelector('#photoshow-close-settings').addEventListener('click', () => {
             document.body.removeChild(dialog);
         });
     }
 
     /* ==================== Initialization ==================== */
-    
+
     function init() {
         log('Initializing PhotoShow userscript...');
-        
+
         // Inject styles
         injectStyles();
-        
+
         // Register context menu
         registerContextMenu();
-        
+
         // Initialize view mode
         state.currentViewMode = state.config.defaultViewMode;
-        
+
         // Setup event listeners
         document.addEventListener('mouseover', handleMouseOver, true);
         document.addEventListener('mouseout', handleMouseOut, true);
         document.addEventListener('keydown', handleKeyDown, true);
-        
+
         log('PhotoShow initialized successfully');
     }
-    
+
     // Start when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

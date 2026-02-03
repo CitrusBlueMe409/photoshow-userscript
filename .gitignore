@@ -16,3 +16,4 @@ yarn-error.log*
 *.swo
 *~
 .cache/
+package-lock.json
