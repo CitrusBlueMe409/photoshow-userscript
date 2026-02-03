@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PhotoShow - Image Viewer
 // @namespace    https://github.com/CitrusBlueMe409/photoshow-userscript
-// @version      1.3.0
+// @version      1.4.0
 // @description  View and download high-definition images by hovering over thumbnails. Userscript implementation of PhotoShow browser extension.
 // @author       CitrusBlueMe409
 // @match        *://*/*
@@ -521,41 +521,37 @@
 
         const currentMode = state.currentViewMode || state.config.defaultViewMode;
 
-        // Leave space for margins (20px on each side)
-        const marginSize = 40;
-
         switch (currentMode) {
         case 'auto': {
             // Automatically decide based on image and viewport
             const aspectRatio = imageWidth / imageHeight;
             if (aspectRatio > state.config.scrollingModeThreshold || aspectRatio < 1 / state.config.scrollingModeThreshold) {
-                return { mode: 'auto-scroll', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
+                return { mode: 'auto-scroll', maxWidth: viewport.width * 0.85, maxHeight: viewport.height * 0.85 };
             }
-            return { mode: 'auto-fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
+            return { mode: 'auto-fit', maxWidth: viewport.width * 0.85, maxHeight: viewport.height * 0.85 };
         }
         case 'fit':
-            // Fit mode - fills viewport as much as possible (with margins)
-            return { mode: 'fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
+            // Fit mode - fills viewport as much as possible (95%)
+            return { mode: 'fit', maxWidth: viewport.width * 0.95, maxHeight: viewport.height * 0.95 };
 
         case 'max-fit':
-            // 90% fit mode - ensures image always fits within 90% of viewport without cropping
-            // Use actual 90% constraint, not just smaller percentage
-            return { mode: 'max-fit', maxWidth: (viewport.width - marginSize) * 0.9, maxHeight: (viewport.height - marginSize) * 0.9 };
+            // Max-fit mode - 75% of viewport (clearly smaller than fit)
+            return { mode: 'max-fit', maxWidth: viewport.width * 0.75, maxHeight: viewport.height * 0.75 };
 
         case 'lite':
-            // Small preview mode - 30% of viewport
-            return { mode: 'lite', maxWidth: viewport.width * 0.3, maxHeight: viewport.height * 0.3 };
+            // Small preview mode - 35% of viewport
+            return { mode: 'lite', maxWidth: viewport.width * 0.35, maxHeight: viewport.height * 0.35 };
 
         case 'mini':
-            // Tiny preview mode - 15% of viewport
-            return { mode: 'mini', maxWidth: viewport.width * 0.15, maxHeight: viewport.height * 0.15 };
+            // Tiny preview mode - 20% of viewport
+            return { mode: 'mini', maxWidth: viewport.width * 0.20, maxHeight: viewport.height * 0.20 };
 
         case 'panoramic':
             // Full size mode - show at original size (may require scrolling)
             return { mode: 'panoramic', maxWidth: imageWidth, maxHeight: imageHeight };
 
         default:
-            return { mode: 'auto-fit', maxWidth: viewport.width - marginSize, maxHeight: viewport.height - marginSize };
+            return { mode: 'auto-fit', maxWidth: viewport.width * 0.85, maxHeight: viewport.height * 0.85 };
         }
     }
 
@@ -617,18 +613,11 @@
             // Determine view mode and get max dimensions
             const viewMode = determineViewMode(dimensions.width, dimensions.height);
 
-            // Reserve space for padding and info bar
-            const padding = 16; // Space around image inside viewer
-            const infoBarHeight = needsInfoBar ? 44 : 0; // Info bar height when visible
-
-            // Calculate maximum space available for the image itself
-            const maxImageWidth = viewMode.maxWidth - (padding * 2);
-            const maxImageHeight = viewMode.maxHeight - (padding * 2) - infoBarHeight;
-
-            // Calculate scale to fit image in available space
+            // Simple calculation: just scale the image to fit mode constraints
+            // Info bar will flow naturally below image in document flow
             const scale = Math.min(
-                maxImageWidth / dimensions.width,
-                maxImageHeight / dimensions.height,
+                viewMode.maxWidth / dimensions.width,
+                viewMode.maxHeight / dimensions.height,
                 1 // Don't scale up beyond original size
             );
 
@@ -636,27 +625,23 @@
             const displayWidth = Math.round(dimensions.width * scale);
             const displayHeight = Math.round(dimensions.height * scale);
 
-            // Calculate viewer container size (includes padding and info bar)
-            const containerWidth = displayWidth + (padding * 2);
-            const containerHeight = displayHeight + (padding * 2) + infoBarHeight;
-
             // Set image size
             viewerImg.src = hdUrl;
             viewerImg.style.width = displayWidth + 'px';
             viewerImg.style.height = displayHeight + 'px';
 
-            // Set image container size (includes padding)
+            // Image container just wraps the image
             imageContainer.style.width = displayWidth + 'px';
             imageContainer.style.height = displayHeight + 'px';
-            imageContainer.style.padding = padding + 'px';
-            imageContainer.style.boxSizing = 'content-box';
 
-            // Set viewer outer container dimensions
-            viewer.style.width = containerWidth + 'px';
-            viewer.style.height = containerHeight + 'px';
+            // Viewer container sizes to content (image + info bar flows after)
+            viewer.style.width = displayWidth + 'px';
+            viewer.style.height = 'auto'; // Let it size to fit image + info
 
-            // Calculate position based on actual viewer size
-            const position = calculateViewerPosition(thumbnailElement, containerWidth, containerHeight);
+            // Calculate position - use displayWidth and estimate height
+            // Info bar adds ~44px when visible, use for positioning
+            const estimatedHeight = displayHeight + (needsInfoBar ? 44 : 0);
+            const position = calculateViewerPosition(thumbnailElement, displayWidth, estimatedHeight);
             viewer.style.left = position.x + 'px';
             viewer.style.top = position.y + 'px';
 
@@ -1100,15 +1085,14 @@
             }
             
             .photoshow-viewer-info {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
+                /* NOT absolute - flows after image naturally */
                 padding: 8px 12px;
                 background: rgba(0, 0, 0, 0.7);
                 color: white;
                 font-size: 12px;
                 line-height: 1.4;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             #photoshow-viewer.photoshow-light .photoshow-viewer-info {

@@ -5,7 +5,53 @@ All notable changes to PhotoShow Userscript will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-02-03
+## [1.4.0] - 2026-02-03
+
+### 🚨 CRITICAL FIXES - THE REAL FIX
+
+**Previous versions (1.3.0, 1.2.1) DID NOT properly fix the reported issues. This version ACTUALLY fixes them.**
+
+#### Fixed - Image Info Display
+- **ROOT CAUSE IDENTIFIED**: Info bar used `position: absolute; bottom: 0` which overlapped the image
+- **PROPER FIX**: Changed info bar to normal document flow (removed absolute positioning)
+- Info bar now appears BELOW the image naturally, NOT overlapping
+- Dimensions display correctly (e.g., "1920 × 1080")
+- Format displays correctly (e.g., "PNG", "JPG")
+- All info items work when enabled in settings
+
+#### Fixed - View Modes
+- **ROOT CAUSE**: Modes weren't distinct enough, percentage values too similar
+- **PROPER FIX**: Made each mode CLEARLY different:
+  - `fit`: 95% of viewport (largest, fills screen)
+  - `max-fit`: 75% of viewport (clearly smaller than fit)
+  - `auto`: 85% of viewport (balanced default)
+  - `lite`: 35% of viewport (medium preview)
+  - `mini`: 20% of viewport (small preview)
+  - `panoramic`: Original image size
+- Switching modes (F, 9, L, M, P) now produces OBVIOUS visual changes
+- Mode indicator displays correctly in top-right
+
+#### Changed - Algorithm Simplification
+- **REMOVED complex padding/space reservation logic** (was over-engineered)
+- Simplified viewer sizing - just scale image to mode constraints
+- Info bar flows naturally in document, no manual space calculation needed
+- Viewer height set to `'auto'` to fit content properly
+- Much cleaner, more maintainable code
+
+#### Technical
+- CSS: Removed `position: absolute` from `.photoshow-viewer-info`
+- CSS: Added `width: 100%; box-sizing: border-box` to info bar
+- JS: Simplified showViewer() calculation (removed ~30 lines of complex code)
+- JS: Changed viewer height from calculated value to `'auto'`
+- JS: More distinct percentage values in determineViewMode()
+
+### Why This Fix Works (Previous Attempts Failed)
+1. **v1.3.0 tried to reserve space** but CSS still overlapped → Didn't fix display
+2. **v1.2.1 used wrong percentages** → Modes looked too similar
+3. **v1.4.0 fixes CSS structure** → Info bar actually appears below image
+4. **v1.4.0 uses distinct percentages** → Modes are clearly different
+
+## [1.3.0] - 2026-02-03 ❌ (FAILED TO FIX ISSUES)
 
 ### Fixed
 - **CRITICAL: Complete rewrite of viewer sizing and positioning algorithm**
