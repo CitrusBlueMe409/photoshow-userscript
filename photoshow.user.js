@@ -1584,6 +1584,7 @@
                     download: dialog.querySelector('#setting-keyboardShortcuts-download').checked,
                     copy: dialog.querySelector('#setting-keyboardShortcuts-copy').checked,
                     toggleMode: dialog.querySelector('#setting-keyboardShortcuts-toggleMode').checked,
+                    // View mode shortcuts all share same value
                     autoMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     fitMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,
                     liteMode: dialog.querySelector('#setting-keyboardShortcuts-viewModes').checked,

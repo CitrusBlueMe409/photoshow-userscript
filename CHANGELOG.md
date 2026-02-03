@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Full Settings UI** - Comprehensive graphical settings interface
   - Beautiful tabbed interface with 4 tabs (General, Viewer, Keyboard, Advanced)
-  - All 100+ settings accessible via GUI
+  - 32+ settings accessible via GUI (subset of all 100+ configuration options)
   - Real-time configuration updates
   - Responsive design with modern styling
   - Settings export/import buttons
