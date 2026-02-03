@@ -1,5 +1,56 @@
 # PhotoShow Userscript - Troubleshooting Guide
 
+## 🚨 最も一般的な問題: PhotoShowが無効になっている
+
+### 症状
+コンソールに以下のメッセージが表示される:
+```
+[PhotoShow] ❌ PhotoShow is DISABLED in settings!
+[PhotoShow] Viewer disabled in config
+```
+
+### 原因
+PhotoShowが設定で無効化されています（デフォルトでは有効ですが、以前の設定で無効化された可能性があります）
+
+### 解決方法（3つの方法）
+
+#### 方法1: Settings UIから有効化（推奨）
+1. ブラウザのユーザースクリプトマネージャーのメニューを開く
+2. 「PhotoShow Settings」を選択
+3. 「Enable PhotoShow」にチェックを入れる
+4. 「Save & Apply」をクリック
+5. ページをリロード
+
+#### 方法2: コンソールコマンドで即座に有効化
+ブラウザの開発者ツールのコンソールで以下を実行:
+```javascript
+window.enablePhotoShow()
+```
+→ 自動的にページがリロードされ、PhotoShowが有効になります
+
+#### 方法3: 設定を完全にリセット
+```javascript
+window.resetPhotoShowSettings()
+```
+→ すべての設定がデフォルトに戻ります
+
+### 便利なコンソールコマンド
+
+PhotoShowは以下のヘルパー関数をwindowオブジェクトに公開しています:
+
+```javascript
+// PhotoShowを有効化
+window.enablePhotoShow()
+
+// PhotoShowを無効化
+window.disablePhotoShow()
+
+// すべての設定をリセット
+window.resetPhotoShowSettings()
+```
+
+---
+
 ## 問題: ビューワーが表示されない
 
 画像は検出されているがビューワーが表示されない場合、以下の手順で問題を診断してください。

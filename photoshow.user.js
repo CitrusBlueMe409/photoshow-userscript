@@ -424,7 +424,9 @@
 
             // Check if viewer should be shown
             if (!state.config.enabled) {
-                log('Viewer disabled in config');
+                log('❌ PhotoShow is DISABLED in settings!');
+                log('💡 To enable: Open PhotoShow Settings from your userscript manager menu and check "Enable PhotoShow"');
+                log('⚡ Quick fix: Run this in console: GM_setValue("photoshow_global_config", {...GM_getValue("photoshow_global_config", {}), enabled: true})');
                 return;
             }
             if (state.config.whitelistMode && !GM_getValue(SITE_CONFIG_KEY, null)) {
@@ -1725,6 +1727,13 @@
     function init() {
         log('Initializing PhotoShow userscript...');
 
+        // Check if PhotoShow is enabled
+        if (!state.config.enabled) {
+            log('⚠️  PhotoShow is currently DISABLED');
+            log('💡 To enable, open Settings from your userscript manager menu');
+            log('⚡ Or run in console: window.enablePhotoShow()');
+        }
+
         // Inject styles
         injectStyles();
 
@@ -1740,6 +1749,30 @@
         document.addEventListener('keydown', handleKeyDown, true);
 
         log('PhotoShow initialized successfully');
+
+        // Expose helper functions to window for console access
+        window.enablePhotoShow = function() {
+            const currentConfig = GM_getValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
+            currentConfig.enabled = true;
+            GM_setValue(GLOBAL_CONFIG_KEY, currentConfig);
+            log('✅ PhotoShow ENABLED! Reloading page...');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        window.disablePhotoShow = function() {
+            const currentConfig = GM_getValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
+            currentConfig.enabled = false;
+            GM_setValue(GLOBAL_CONFIG_KEY, currentConfig);
+            log('❌ PhotoShow DISABLED! Reloading page...');
+            setTimeout(() => location.reload(), 500);
+        };
+
+        window.resetPhotoShowSettings = function() {
+            GM_setValue(GLOBAL_CONFIG_KEY, DEFAULT_CONFIG);
+            GM_deleteValue(SITE_CONFIG_KEY);
+            log('🔄 PhotoShow settings reset to defaults! Reloading page...');
+            setTimeout(() => location.reload(), 500);
+        };
     }
 
     // Start when DOM is ready
