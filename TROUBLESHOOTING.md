@@ -1,40 +1,42 @@
 # PhotoShow Userscript - Troubleshooting Guide
 
-## 🚨 最も一般的な問題: PhotoShowが無効になっている
+## 🚨 最も一般的な問題
 
-### 症状
+### 問題1: PhotoShowが無効になっている
+
+#### 症状
 コンソールに以下のメッセージが表示される:
 ```
 [PhotoShow] ❌ PhotoShow is DISABLED in settings!
 [PhotoShow] Viewer disabled in config
 ```
 
-### 原因
+#### 原因
 PhotoShowが設定で無効化されています（デフォルトでは有効ですが、以前の設定で無効化された可能性があります）
 
-### 解決方法（3つの方法）
+#### 解決方法（3つの方法）
 
-#### 方法1: Settings UIから有効化（推奨）
+**方法1: Settings UIから有効化（推奨）**
 1. ブラウザのユーザースクリプトマネージャーのメニューを開く
 2. 「PhotoShow Settings」を選択
 3. 「Enable PhotoShow」にチェックを入れる
 4. 「Save & Apply」をクリック
 5. ページをリロード
 
-#### 方法2: コンソールコマンドで即座に有効化
+**方法2: コンソールコマンドで即座に有効化**
 ブラウザの開発者ツールのコンソールで以下を実行:
 ```javascript
 window.enablePhotoShow()
 ```
 → 自動的にページがリロードされ、PhotoShowが有効になります
 
-#### 方法3: 設定を完全にリセット
+**方法3: 設定を完全にリセット**
 ```javascript
 window.resetPhotoShowSettings()
 ```
 → すべての設定がデフォルトに戻ります
 
-### 便利なコンソールコマンド
+#### 便利なコンソールコマンド
 
 PhotoShowは以下のヘルパー関数をwindowオブジェクトに公開しています:
 
@@ -48,6 +50,31 @@ window.disablePhotoShow()
 // すべての設定をリセット
 window.resetPhotoShowSettings()
 ```
+
+---
+
+### 問題2: "pattern.find.test is not a function" エラー
+
+#### 症状
+コンソールに以下のエラーが表示される:
+```
+[PhotoShow] Error in showViewer: pattern.find.test is not a function
+```
+
+#### 原因
+v1.1.1以前のバージョンで保存された設定ファイルに、シリアライズされたRegExpオブジェクトが含まれている可能性があります。
+
+#### 解決方法
+
+**v1.1.2以降にアップデート（推奨）**
+- v1.1.2で自動的にRegExpオブジェクトが復元されるようになりました
+- ユーザースクリプトを最新版に更新するだけで解決します
+
+**または、設定をリセット**
+```javascript
+window.resetPhotoShowSettings()
+```
+→ 設定がデフォルトに戻り、正しいRegExpオブジェクトが使用されます
 
 ---
 
